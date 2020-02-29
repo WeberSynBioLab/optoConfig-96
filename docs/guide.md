@@ -6,8 +6,6 @@ title: optoConfig-96 User Guide
 
 User guide for version 1.0.0.
 
-[//]: # (TableOfContents)
-
 ## Installation Instructions
 
 optoConfig-96 is available as a Python package or as standalone bundles for Windows 10 and MacOS 10.15. Installation should not take more than 5 minutes.
