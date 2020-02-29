@@ -1,0 +1,24 @@
+﻿\begin{tikzpicture}[>=stealth, line width=3pt]
+
+\tikzset{
+		line/.style={
+				draw, white, line width=8pt, ->,
+				postaction={draw, red, line width=3pt, shorten >=6pt}
+		}
+}
+
+\node (image) [imgnode] {\includegraphics{bulk_assign_programs}};
+\node (image2) [imgnode, below=2cm of image] {\includegraphics{bulk_assign_wells}};
+
+\draw[->, >=stealth] (image) -- (image2) node[midway, right] {\resizebox{3.5cm}{!}{Bulk assign}};
+
+
+\begin{scope}[shift=(image.south west), x=(image.south east), y=(image.north west)]
+\draw[line] (0.9, 0.9) -- ++(0, -0.87);
+\end{scope}
+
+\begin{scope}[shift=(image2.south west), x=(image2.south east), y=(image2.north west)]
+\draw[line] (0.05, 0.7) -- ++(0.75, 0) --++ (0.1, -0.35) --++ (-0.85, 0);
+\end{scope}
+
+\end{tikzpicture}

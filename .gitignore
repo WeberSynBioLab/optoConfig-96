@@ -1,0 +1,4 @@
+__pycache__
+optoPlate96/resources/*icon*
+!icon_master.png
+!*icon.svg
