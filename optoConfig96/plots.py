@@ -41,7 +41,7 @@ class StepPlotHandler(Handler):
         # info.xlimits.update_high_on_enter()
 
 
-class StepPlot(HasTraits):
+class StepPlot(utils.Updateable):
     # Matplotlib `Figure` object of the current Step.
     figure = Instance(Figure, ())
 

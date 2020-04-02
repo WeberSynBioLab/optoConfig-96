@@ -196,10 +196,18 @@ class SetAllAssistant(BaseStep):
                 d[param] = getattr(self, param)
                 if param in ('duration', 'pulse_on', 'pulse_off'):
                     d[param + '_unit'] = getattr(self, param + '_unit')
+        # Set update states for involved objects, so they only get updated
+        # once verything has been set.
         self.steplist.start_update('updated')
+        updating_programs = []
         for step in self.steplist.selected:
+            for program in step.in_programs:
+                updating_programs.append(program)
+                program.start_update('steps_updated')
             for param, value in d.items():
                 setattr(step, param, value)
+        for program in updating_programs:
+            program.stop_update('steps_updated')
         self.steplist.stop_update('updated')
 
     def default_traits_view(self):
@@ -249,3 +257,17 @@ class SetAllAssistant(BaseStep):
             buttons=OKCancelButtons,
             title='Set Parameters for Steps')
         return view
+
+
+class NameProgramAssistant(HasTraits):
+    """
+    Allow the user to immediately set a name for a new Program which is created
+    from the Step list.
+    """
+
+    name = Str
+    view = View(
+        Item('name'),
+        kind='livemodal',
+        buttons=OKCancelButtons,
+        title='Name for new Program')

@@ -34,6 +34,8 @@ from . import export
 from . import resources
 from . import hardware
 from . import utils
+from . import experiment_csv
+from . import testmode
 
 
 class ApplicationHandler(Controller, SaveHandler):
@@ -123,8 +125,7 @@ class ApplicationHandler(Controller, SaveHandler):
         if isinstance(info.object.current_well, plates.WellProgramsViewer):
             info.object.current_well.well = well
         else:
-            info.object.current_well = plates.WellProgramsViewer()
-            info.object.current_well.well = well
+            info.object.current_well = plates.WellProgramsViewer(well=well)
 
     def object_current_well_updated_changed(self, info):
         """ Determine which well's programs to display. """
@@ -253,6 +254,17 @@ class ApplicationHandler(Controller, SaveHandler):
             self.saveObject.edit_traits()
             return False
 
+    def simulate(self, info):
+        player = testmode.ExperimentPlayer(plate=info.object.plate)
+        player.edit_traits()
+
+    def export_csv(self, info):
+        experiment = experiment_csv.ExperimentCsv(plate=info.object.plate)
+        try:
+            experiment.export()
+        except Exception:
+            utils.error('Error: Saving failed!')
+
     def export(self, info):
         # Close existing export window, if available
         if info.object.code is not None:
@@ -287,7 +299,11 @@ class ApplicationHandler(Controller, SaveHandler):
             if config._require_redraw:
                 # Updating the plate configuration requires resetting the UI,
                 # because the TableEditor changes based on the Grouping setting.
+                info.object.plate.selected = []
                 info.ui.dispose()
+                # Unassign all programs to prevent stray references
+                # from programs to assigned wells
+                info.object.plate.clear_programs(info.object.plate.wells)
                 info.object.plate.config = config
                 info.object.edit_traits()
             else:
@@ -341,7 +357,6 @@ class ApplicationHandler(Controller, SaveHandler):
                 return True
         except:
             utils.error("Opening the user guide failed, but you can find it online on GitHub!")
-
 
 
 class Application(CanSaveMixin):
@@ -459,10 +474,12 @@ class Application(CanSaveMixin):
         save['programs'] = programs
         save['wells'] = wells
 
-        with open(self.filepath, 'w') as savefile:
-            savefile.write(json.dumps(save))
-
-        self.dirty = False
+        try:
+            with open(self.filepath, 'w') as savefile:
+                savefile.write(json.dumps(save))
+            self.dirty = False
+        except Exception:
+            utils.error('Error: Saving failed!')
 
     def open(self, saved, show_progress=True):
         """
@@ -521,8 +538,9 @@ class Application(CanSaveMixin):
     # Status Bar
     # --------------------------------------------------------------------------
 
-    memreqs = Property(depends_on='all_steps.steps.dirtied, all_programs.programs.dirtied, plate.led_types')
+    memreqs = Property(depends_on='all_steps.steps.size_update, all_programs.programs.size_update, plate.size_update, hardware.fan_speed')
 
+    @cached_property
     def _get_memreqs(self):
         """ Update memory requirements regularly. """
         try:
@@ -544,7 +562,7 @@ class Application(CanSaveMixin):
             base = base.format(cur=cur, total=total, prc=prc, warn=warn)
             return base
         except Exception:
-            return 'Could not calculate memory requirements. Are there invalid Steps or programs?'
+            return 'Could not calculate memory requirements. Are there invalid Steps or programs in use?'
 
     corrections = Property(depends_on='plate.led_types')
 
@@ -571,7 +589,9 @@ class Application(CanSaveMixin):
             Action(name='Open ...', action='open'),
             Action(name='Save', action='save', enabled_when='dirty'),
             Action(name='Save As ...', action='saveAs'),
-            Action(name='Export ...', action='export'),
+            Action(name='Simulate Experiment ...', action='simulate'),
+            Action(name='Export Illumination Scheme (csv) ...', action='export_csv'),
+            Action(name='Export Code ...', action='export'),
             # Exitting does not actually terminate the application.
             # Remove the option for now - the user will need to use the OS
             # capabilities to close.

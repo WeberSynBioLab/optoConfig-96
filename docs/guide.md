@@ -4,25 +4,29 @@ title: optoConfig-96 User Guide
 
 # optoConfig-96 - Interactive configuration of experiments using the optoPlate-96
 
-User guide for version 1.0.0.
+User guide for version 1.0.1.
 
-## Installation Instructions
+# Installation Instructions
 
-optoConfig-96 is available as a Python package or as standalone bundles for Windows 10 and MacOS 10.15. Installation should not take more than 5 minutes.
+optoConfig-96 is available as a Python package or as standalone bundles for Windows 10 and MacOS 10.15. Installation should not take more than 5 minutes. To upload the generated code to the Arduino Micro controlling optoPlate-96, the Arduino IDE must be installed separately. It is available for Windows, Mac and Linux at [the website of the Arduino project](https://www.arduino.cc/en/main/software).
 
-### Windows 10
-1. Download the .zip archive from the GitHub _Releases_ page.
+## Windows 10
+1. Download the windows_optoConfig-96-1.0.0.zip archive from the GitHub _Releases_ page.
 1. Extract the archive to a location of your choice.
 1. Run _optoConfig-96.exe_. You may be asked to allow execution of the application.
 
-### MacOS
-1. Download the .dmg disk image from the GitHub _Releases_ page.
+## MacOS
+1. Download the macos_optoConfig-96-1.0.0.dmg disk image from the GitHub _Releases_ page.
 1. Open the disk image and drag the application to the _Applications_ folder as indicated (or to another location of your choice).
 1. You may be asked to allow execution of a foreign application. To do this, go to *System Preferences > Security & Privacy > General* and grant optoConfig-96 permission to run. Administrator rights may be required depending on your security settings.
 
-### As a Python package
-1. Clone the repository or download the package from the GitHub _Releases_ page. The package is not yet on [PyPI](https://www.pypi.org).
-    1. If you cloned the repository, you will first have to prepare the package by running `python setup.py build sdist`.
+## As a Python package
+1. Clone the repository by entering:
+
+     `git clone https://github.com/WeberSynBioLab/optoConfig-96.git`
+
+     in a terminal. Alternatively, download the package from the GitHub _Releases_ page. The package is not yet on [PyPI](https://www.pypi.org).
+    1. If you cloned the repository, you will first have to prepare the package by running `python setup.py build sdist` in a terminal, in the directory in which the optoConfig-96 `setup.py` is located.
     1. The package will be created at `dist/optoConfig96-x.x.x.tar.gz`, where `x.x.x` denotes the current version.
 1. Make sure you have Python 3.7 or Python 3.8 installed by running `python --version` in a terminal.
 1. We strongly recommend to use a Python virtual environment in order prevent compatibility clashes of dependencies. To create one, run `python -m venv optoconfig_venv`, then activate it:
@@ -39,7 +43,7 @@ optoConfig-96 is available as a Python package or as standalone bundles for Wind
 
 ## Overview
 
-optoConfig-96 is a program to interactively create protocols for the [optoPlate-96 illumination device](https://www.nature.com/articles/s41596-019-0178-y). It should get you up and running quickly, while providing enough flexibility for complicated illumination protocols.
+optoConfig-96 is a program to interactively create protocols for the [optoPlate-96 illumination device](https://www.nature.com/articles/s41596-019-0178-y). It should get you up and running quickly, while providing enough flexibility for complex illumination protocols.
 
 The general workflow to create an illumination protocol looks as follows:
 
@@ -52,16 +56,17 @@ The general workflow to create an illumination protocol looks as follows:
 
 This section will briefly explain how to execute the basic workflow.
 
+1. Upon launching the application, the *Plate Configuration* dialog will open. Here, you can specify if you want to configure the 1-, 2- or 3-color variant of the optoPlate-96.
 1. Create a new Step in the Step list, or select an existing one. Adjust the Step parameters as desired.
 1. Create a new Program in the Program list, or use an existing one. Select the Program you wish to assign the selected Step to.
 1. Below the Step list, click *Assign* to add the selected Step to the selected Program. Alternatively, right-click the Step and choose *Assign selected to Program...*. You can use the same Step multiple times in the same Program, and you can use the same Step in different Programs.
 1. Select the well to which you would like to assign your Program. Below the Program List, select the relevant LED you wish to assign your Program to. Then, click *Assign* below the Program List. Alternatively, right click the Program and choose *Assign program to selected wells...*. You can use the same Program for multiple LEDs and wells.
-1. Choose *File > Export...* to generate and display the Arduino code. Copy the code into the Arduino IDE and connect the Arduino controlling the optoPlate to your computer. In the Arduino IDE, choose "Arduino Micro" under *Tools > Board*, and select the port to which the board is connected under *Tools > Port*. Then upload by choosing *Sketch > Upload*. For more help on uploading code to the Arduino, see [the Arduino reference](https://www.arduino.cc/en/Guide/Environment#uploading).
+1. Choose *File > Export Code ...* to generate and display the Arduino code. Copy the code into the Arduino IDE and connect the Arduino controlling the optoPlate to your computer. In the Arduino IDE, choose "Arduino Micro" under *Tools > Board*, and select the port to which the board is connected under *Tools > Port*. Then upload by choosing *Sketch > Upload*. For more help on uploading code to the Arduino, see [the Arduino reference](https://www.arduino.cc/en/Guide/Environment#uploading).
 1. You are done!
 
 If you identify issues during configurating or running your illumination protocols, please contact us!
 
-Please note that LEDs may light up erratically if power is restored to the Arduino Micro while it is connected to a computer via a Micro-USB cable. To restore proper functionality, press the reset button on the Arduino, or disconnect the Arduino from your computer and turn the power off and back on again.
+Please note that LEDs may light up erratically if power is restored to the Arduino Micro via the optoPlate-96 while it is connected to a computer by a Micro-USB cable. To restore proper functionality, press the reset button on the Arduino, or disconnect the Arduino from your computer and turn the power off and back on again.
 
 ## Interface
 
@@ -95,7 +100,7 @@ The application window is separated into a few distinct areas:
 - *Intensity:*
 
     Intensity of the Step, in arbitrary units from 0 (off) to 4095 (maximum intensity). For pulsed Steps, this is the intensity during the ON phases. During the OFF phases, the intensity is 0. If desired, you may set conversion factors for each LED under _Configuration > Configure Plate..._, in order to display a conversion to physical units.
-    **The converted values are only for illustration purposes and do not affect the output!**
+    **The converted values are only for illustration purposes and do not affect the generated Arduino code of optoConfig-96!**
 
 - *Pulsed:*
 
@@ -146,6 +151,8 @@ The application window is separated into a few distinct areas:
 
     <a href="images/setallparams.jpg"><img src="images/setallparams.jpg" title="Dialog to set parameters for all selected Steps" width="200"></img></a>
 
+    _The dialog to set parameters for all selected Steps._
+
     Opens a dialog in which all Step parameters can be defined. After clicking OK, all parameters for which *Set* was selected are applied to all selected Steps.
 
 
@@ -153,35 +160,37 @@ The application window is separated into a few distinct areas:
 
     <a href="images/interpolation_dialog.jpg"><img src="images/interpolation_dialog.jpg" title="Dialog to set parameters for all selected Steps" width="200"></img></a>
 
+    _The interpolation dialog._
+
     <a href="images/interpolation_example.jpg"><img src="images/interpolation_example.jpg" title="The Program generated by the settings shown before" width="200"></img></a>
 
-    _The interpolation dialog and the Steps (assembled in a Program) generated by these settings._
+    _The Steps (assembled in a Program) generated by these settings._
 
     Opens a dialog in which new Steps can be created by linearly interpolating between boundaries for each parameter. The default values for the start and end values correspond to the parameters of the first and last selected Step, respectively. Interpolation can be used to quickly create a gradient illumination pattern, for instance with increasing or decreasing intensity over time.
 
     - *Name:*
 
-    The prefix that will be added to the start of the names of generated Steps, followed by consecutive numbering. The name "Interpolation" will generate Steps with names Interpolation_1, Interpolation_2, ...
+        generate Steps with names Interpolation_1, Interpolation_2, ...
 
     - *Start values, End values:*
 
-    Set the parameter values to interpolate between here.
+        Set the parameter values to interpolate between here.
 
     - *Interpolation steps*:
 
-    The number of Steps to generate.
+        The number of Steps to generate by linear interpolation.
 
     - *Assign all to program:*
 
-    When this option is selected, a new Program is created which will contain all of the generated Steps in sequence.
+        When this option is selected, a new Program is created which will contain all of the generated Steps in sequence.
 
     - *Assign each to program:*
 
-    When this option is selected, a new Program is created _for each individual Step_. This can be useful if you want to define gradients across multiple wells. Quickly assigning different programs to wells can be achieved by using the *Bulk assign* operation, see section *Program List* for details.
+        When this option is selected, a new Program is created _for each individual Step_. This can be useful if you want to define gradients across multiple wells. Quickly assigning different programs to wells can be achieved by using the *Bulk assign* operation, see section *Program List* for details.
 
 - *Assign Selected to Program...:*
 
-    Assign the selected Step(s) to a new or existing Program.
+    Assign the selected Step(s) to a new or existing Program. When Steps are assigned to a new Program, a dialog opens, allowing you to name the new Program.
 
 ---
 
@@ -198,7 +207,7 @@ _The Step Editor panel._
 
 - *Range Slider:*
 
-    The slider allows setting the X axis limits, which may be useful to verify short pulsing times for very long steps. In this case, individual pulses may no longer be clearly discernible.
+    The slider allows setting the X axis limits, which may be useful to verify short pulsing times for very long steps. In this case, individual pulses may no longer be clearly discernible. To the right of the range slider, the time unit to use for the plot's X axis can be selected in the dropdown menu.
 
 - *Show pulsed:*
 
@@ -206,7 +215,7 @@ _The Step Editor panel._
 
 - *Color:*
 
-    The color used to plot the Step in the Step and Program Editors.
+    The color used to plot the Step in the Step and Program Editors. The default colors are selected randomly and do not relate to the LED color.
 
 
 #### Step Parameters
@@ -226,7 +235,7 @@ _The Program Editor panel._
 
 - *Range Slider:*
 
-    The slider allows setting the X axis limits, which may be useful to inspect short and long Steps in the same Program.
+    The slider allows setting the X axis limits, which may be useful to inspect short and long Steps in the same Program. To the right of the range slider, the time unit to use for the plot's X axis can be selected in the dropdown menu.
 
 - *Show pulsing for:*
 
@@ -244,9 +253,9 @@ _The Program Editor panel._
 
         Determine whether to show a Step pulsed by the *Show pulsed* setting of the respective Step.
 
-- *Limit cycles, Mac cycles:*
+- *Limit cycles, Max cycles:*
 
-    When this option is activated, the number of pulsing cycles that can be shown is capped at *max cycles*. As long as all Steps in the active Program taken together do not undergo more pulsing cycles than the specified maximum, pulsing is plotted. When this value is exceeded, Steps are shown as constant to speed up the display. By default, this is set to 100. In this case, adding four Steps with 30 pulsing cycles each would disable pulse plotting for the program.
+    When this option is activated, the number of pulsing cycles that can be shown is capped at *max cycles*. As long as all Steps in the active Program taken together do not undergo more pulsing cycles than the specified maximum, pulsing is plotted. When this value is exceeded, Steps are shown as constant to speed up the display. By default, this is set to 100. In this case, adding e.g. four Steps with 30 pulsing cycles each would disable pulse plotting for the program.
 
 
 
@@ -267,9 +276,9 @@ _The Program Editor panel._
 
     - *Repeat the last step:*
 
-        After completion of all Steps, the last Step in the Program is repeated indefinitely. While it is not possible to export Programs with a total Step duration of more than the maximum (approximately 49 days), this limit may in principle be reached if a Step is set to repeat at the end of the Program. However, **this is not supported**!
+        After completion of all Steps, the last Step in the Program is repeated indefinitely. While it is not possible to export Programs with a total Step duration of more than the maximum (approximately 49 days), this limit may in principle be reached if a Step is set to repeat at the end of the Program. However, **program durations of more than 49 days are not supported**!
 
-    The built-in LED on the Arduino Micro will blink when all Programs have completed all of their Steps at least once - it will also blink when a Program is set to repeat its last Step!
+    The built-in LED on the Arduino Micro will blink when all Programs have completed their last Step - it will also blink when a Program is set to repeat its last Step!
 
 - *List of Steps in the Program:*
 
@@ -286,17 +295,25 @@ _The Program Editor panel._
 
     ID and name of the Program, respectively.
 
+- *After End:*
+
+    See the _Repeat the last step_ parameter for Programs.
+
 - *Invalid:*
 
     If a Program is invalid, it cannot be exported to the Arduino. Invalid Programs are highlighted in red, and the cause of invalidity is displayed as a tooltip when you hover over them.
 
 
 #### Buttons
-> Below the Step list, common operations are immediately available:
+> Below the Program list, common operations are immediately available:
 
 - *Delete, Delete all:*
 
-    Delete the selected Step, or all Steps at once.
+    Delete the selected Program, or all Programs at once.
+
+- *New, Duplicate:*
+
+    Create a new Program, or duplicate the selected Programs.
 
 - *LED Selector:*
 
@@ -332,6 +349,7 @@ _The Program Editor panel._
 > Here, the Programs which are assigned to the LEDs of a well are displayed.
 
 <a href="images/well_colors.jpg"><img src="images/well_colors.jpg" title="Wells are colored depending on which LEDs have an assigned Program" width="200"></img></a>
+_Cells are colored depending on the LEDs which have a program assigned to them._
 
 The Program Assignment table is formatted like a multi-well plate: Table rows correspond to plate rows, table columns correspond to plate columns.
 
@@ -358,11 +376,121 @@ The display settings are the same as in the Program Editor, with one addition:
 
 ### Exporting
 
-After defining Steps, creating Programs and assigning them to LEDs, the experimental setup is now ready to be exported to a code file that can be uploaded to the Arduino. To do this, choose *File > Export*. You can either copy the code and paste it into the Arduino IDE yourself, or choose *Open in IDE* to launch the Arduino IDE. Connect the Arduino controlling the optoPlate to your computer. In the Arduino IDE, choose "Arduino Micro" under *Tools > Board*, and select the port to which the board is connected under *Tools > Port*. Then upload by choosing *Sketch > Upload*. For more help on uploading code to the Arduino, see [the Arduino reference](https://www.arduino.cc/en/Guide/Environment#uploading).
+After defining Steps, creating Programs and assigning them to LEDs, the experimental setup is now ready to be exported to a code file that can be uploaded to the Arduino. To do this, choose *File > Export Code ...*. You can either copy the code and paste it into the Arduino IDE yourself, or choose *Open in IDE* to launch the Arduino IDE. Connect the Arduino controlling the optoPlate to your computer. In the Arduino IDE, choose "Arduino Micro" under *Tools > Board*, and select the port to which the board is connected under *Tools > Port*. Then upload by choosing *Sketch > Upload*. For more help on uploading code to the Arduino, see [the Arduino reference](https://www.arduino.cc/en/Guide/Environment#uploading).
+
+Before uploading the code to the Arduino, you may wish to test or inspect your configuration. [To do so, choose *File > Simulate Experiment ...*](#simulate-experiment).
 
 Please note that LEDs may light up erratically if power is restored to the Arduino Micro while it is connected to a computer via a Micro-USB cable. To restore proper functionality, press the reset button on the Arduino, or disconnect the Arduino from your computer and turn the power off and back on again.
 
 ---
+
+### The File Menu
+
+#### Simulate Experiment ...
+
+> Simulate the LED states over the course of an experiment.
+
+<a href="images/simulation.jpg"><img src="images/simulation.jpg" title="The Simulate Experiment Dialog" width="200"></img></a>
+
+_The Simulate Experiment dialog._
+
+LEDs are displayed in the style of a heatmap. Each LED takes its color from the *Plate Configuration*. Colors are saturated based on the intensity of an LED at a given time.
+
+- *Simulation:*
+
+    The time slider sets the current simulated time for which LED states should be shown. The dropdown menu on the right of the slider allows to set the time unit to use.
+
+    - *Time Factor:*
+
+        After pressing the *Start* button, the time slider will be advanced automatically. The simulated passage of time will be sped up by the factor specified here.
+
+- *Display Settings:*
+
+    - *Intensity Limit:*
+
+        The intensity at which an LED will be displayed fully saturated can be set here. This can be useful if only low intensities are used, which would be hard to distinguish visually.
+
+    - *Show LED:*
+
+        Each type of LED specified in the *Plate Configuration* can be toggled individually.
+
+    - *Apply Corrections:*
+
+        If correction factors were defined in the *Plate Configuration*, should they be applied in the simulation?
+
+#### Export Code ...
+
+Export the finalized configuration to Arduino code. See also [Exporting](#exporting).
+
+#### Export Illumination Scheme (csv) ...
+
+> Export a csv file with tabular information about the illumination protocol.
+
+<a href="images/export_csv.jpg"><img src="images/export_csv.jpg" title="Exported csv opened in a spreadsheet software" width="200"></img></a>
+
+_Exported csv opened in a spreadsheet software_
+
+The exported csv has one row for each well, LED type and Step, and columns for Program and Step parameters. The following columns are exported:
+
+- *well*
+
+    Name of the well.
+
+- *led*
+
+    Name of the LED.
+
+- *program*
+
+    Name of the Program assigned to this well and LED.
+
+- *program_id*
+
+    ID of the Program assigned to this well and LED.
+
+- *total_steps*
+
+    The number of steps in the Program assigned to this well and LED.
+
+- *step*
+
+    Each Step in a Program results in the generation of an additional column. This column holds the name of the Step.
+
+- *step_no*
+
+    The total number of Steps in the Program.
+
+- *step_id*
+
+    The ID of the Step.
+
+- *step_start_time*
+
+    The time (in ms) after which this Step starts.
+
+- *step_duration*
+
+    The duration (in ms) of the Step.
+
+- *step_intensity*
+
+    The LED intensity (in arbitrary units, from 0 to 4095) of the Step.
+
+- *step_pulsed*
+
+    'yes' if the Step is a pulsed Step, or 'no' if it is not.
+
+- *step_pulse_on*
+
+    The pulse on duration of the Step (in ms).
+
+- *step_pulse_off*
+
+    The pulse off duration of the Step (in ms).
+
+- *step_repeat*
+
+    For the last Step in the Program, this is 'yes' if the Program is set to repeat its last Step, or 'no' if not. For Steps which are not the last Step in the Program, this is always 'no'.
 
 ### The Configuration Menu
 
@@ -375,9 +503,16 @@ In the preferences, you can set the path to the Arduino IDE, in order to directl
 
 <a href="images/plate_config.jpg"><img src="images/plate_config.jpg" title="The plate configuration dialog" width="200"></img></a>
 
+_The plate configuration dialog._
+
 - *Grouping:*
 
     You can choose to assign Programs to each of the 96 wells of the optoPlate individually (*96-well*), or you can select (*24-well*) to perform assignment to groups of 4 wells, mimicking the layout of a 24-well plate. Note that changing the Grouping setting will reset all Program assignments.
+
+- *Plate Colors:*
+
+    You can set which configuration of the optoPlate-96 you are using: the 1-color, 2-color or 3-color variant.
+
 
 - *LED types:*
 
@@ -414,26 +549,9 @@ In the preferences, you can set the path to the Arduino IDE, in order to directl
 
 #### Set Fan Speed
 
-You can adjust the fan speed of the fan on the optoPlate from 0 (off) to 255 (maximum speed). The default value is 100. The fan speed needed to provide sufficient cooling will depend on the heat generated by the optoPlate during the protocol, which depends on the numbere of activated LEDs and their intensities.
+You can adjust the fan speed of the fan on the optoPlate from 0 (off) to 255 (maximum speed). The default value is 255. The fan speed needed to provide sufficient cooling will depend on the heat generated by the optoPlate during the protocol, which depends on the number of activated LEDs and their intensities.
 
 ---
-
-### The Status Bar
-
-<a href="images/statusbar.jpg"><img src="images/statusbar.jpg" title="The status bar"></img></a>
-
-- *Memory requirements:*
-
-    Displays an approximation of the storage space that will be required by the current configuration. The exact value varies between the platform and the version of the Arduino IDE, even for the same code. However, it can give you an indication of whether your current configuration is approaching the limits of the Arduino Micro.
-
-- *Corrections:*
-
-    Indicates which LED types have correction factors associated with them.
-
-- *Fan speed:*
-
-    Indicates the currently set fan speed. Adjust it under *Configuration > Set Fan Speed ...*
-
 
 ### The Help Menu
 
@@ -448,3 +566,27 @@ You can pick from several example files made with optoConfig-96. These mostly re
 #### User Guide
 
 Opens the optoConfig-96 user guide in a browser.
+
+---
+
+### The Status Bar
+
+> The status bar displays general information at a glance.
+
+<a href="images/statusbar.jpg"><img src="images/statusbar.jpg" title="The status bar"></img></a>
+
+_The status bar._
+
+- *Memory requirements:*
+
+    Displays an approximation of the storage space that will be required by the current configuration. The exact value varies between the platform and the version of the Arduino IDE, even for the same code. However, it can give you an indication of whether your current configuration is approaching the limits of the Arduino Micro.
+
+- *Corrections:*
+
+    Indicates which LED types have correction factors associated with them.
+
+- *Fan speed:*
+
+    Indicates the currently set fan speed. Adjust it under *Configuration > Set Fan Speed ...*
+
+

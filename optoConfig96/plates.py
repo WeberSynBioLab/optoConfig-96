@@ -190,6 +190,8 @@ class Grouping(HasTraits):
             return 8
         elif self.grouptype == '24-well':
             return 4
+        elif self.grouptype == '6-well':
+            return 2
 
     ncols = Property(depends_on='grouptype')
 
@@ -198,6 +200,8 @@ class Grouping(HasTraits):
             return 12
         elif self.grouptype == '24-well':
             return 6
+        elif self.grouptype == '6-well':
+            return 3
 
     blocksize = Property(depends_on='grouptype')
 
@@ -206,6 +210,8 @@ class Grouping(HasTraits):
             return 96 / 96
         elif self.grouptype == '24-well':
             return 96 / 24
+        elif self.grouptype == '6-well':
+            return 96 / 6
 
 
 class LEDColumn(ObjectColumn):
@@ -254,6 +260,7 @@ led_table = TableEditor(
         LEDColumn(name='corrected')
     ],
     edit_view='object.view',
+    selected='selected_led',
     sortable=False,
     reorderable=False,
     deletable=False,
@@ -262,6 +269,10 @@ led_table = TableEditor(
 
 
 class PlateConfigHandler(Handler):
+    def init(self, info):
+        info.object.selected_led = info.object.led_types[0]
+        return True
+
     def object__led_types_changed_changed(self, info):
         for led_type in info.object.led_types:
             led_type.name_invalid = info.object.led_types_names_invalid
@@ -273,7 +284,7 @@ class PlateConfigHandler(Handler):
             error(msg)
             return False
 
-        if is_ok and info.object._require_redraw:
+        if is_ok and info.object._require_redraw and not info.object._no_redraw_confirm:
             msg = 'Changing the plate configuration will reset all Program assignments.'
             msg += '\nContinue?'
             confirm = PlateConfigChangeWarning(message=msg)
@@ -299,7 +310,41 @@ class PlateConfig(HasTraits):
     nrows = Delegate('grouping')
     ncols = Delegate('grouping')
 
-    led_types = List(LED, [])
+    platetype = Enum('1-Color', '2-Color', '3-Color')
+
+    def _platetype_default(self):
+        return '3-Color'
+
+    @on_trait_change('platetype')
+    def update_led_types(self):
+        self.led_types = self._platetype_led_defaults()
+        self.selected_led = self.led_types[0]
+        return self.led_types
+
+    def _platetype_led_defaults(self):
+        if self.platetype == '1-Color':
+            return [LED(color='#0000FF', name='465 nm')]
+
+        if self.platetype == '2-Color':
+            return [
+                LED(color='#FF0000', name='643 nm'),
+                LED(color='#770000', name='780 nm')]
+
+        if self.platetype == '3-Color':
+            return [
+                LED(color='#0000FF', name='465 nm'),
+                LED(color='#FF0000', name='630 nm'),
+                LED(color='#770000', name='780 nm')]
+
+    led_types = List(LED)
+
+    def _led_types_default(self):
+        return self._platetype_led_defaults()
+
+    selected_led = Instance(LED)
+
+    def _selected_led_default(self):
+        return self.led_types[0]
 
     _led_types_changed = Event
 
@@ -313,12 +358,6 @@ class PlateConfig(HasTraits):
         """ LED types must have a unique name. """
         names = [led_type.name for led_type in self.led_types]
         return len(names) != len(set(names))
-
-    def _led_types_default(self):
-        led_455 = LED(color='#0000FF', name='465 nm')
-        led_660 = LED(color='#FF0000', name='630 nm')
-        led_780 = LED(color='#770000', name='780 nm')
-        return [led_455, led_660, led_780]
 
     conversion_factors = Property(Dict, depends_on='led_types.conversion_factor')
 
@@ -334,9 +373,12 @@ class PlateConfig(HasTraits):
 
     _require_redraw = Bool(False)
 
-    @on_trait_change('grouping')
+    @on_trait_change('grouping, platetype')
     def update_require_redraw(self):
         self._require_redraw = True
+
+    # Skip asking the user whether resetting all programs is okay?
+    _no_redraw_confirm = Bool(False)
 
     units = Property(Dict, depends_on='led_types.unit')
 
@@ -377,7 +419,8 @@ class PlateConfig(HasTraits):
 
     view = View(
         Item('grouptype', label='Grouping'),
-        Item('led_types', editor=led_table),
+        Item('platetype', label='Plate Colors'),
+        Item('led_types', editor=led_table, label='LED Types'),
         title='Plate Configuration',
         buttons=OKCancelButtons,
         kind='modal',
@@ -420,8 +463,8 @@ class WellLED(HasTraits):
 
     def assign_program(self, program):
         self._unassociate_cur_prog()
-        self.program = program
         program.assigned_leds.append(self)
+        self.program = program
 
     def unassign_program(self):
         self._unassociate_cur_prog()
@@ -439,8 +482,12 @@ class Well(HasTraits):
     # Specific LEDs for this well
     leds = List(WellLED)
 
-    # Position of the well on the plate.
+    # Position of the well on the plate as a string, taking grouping into account
     position = Str('')
+
+    # Position of the well on the plate as indices, without grouping
+    pos_row = Int
+    pos_col = Int
 
     def _leds_default(self):
         return [WellLED(led_type_idx=idx, well=self) for idx in range(len(self.led_types))]
@@ -584,6 +631,7 @@ class Plate(utils.Updateable):
     # Configuration of the plate: LEDs and well groupings
     config = Instance(PlateConfig, ())
 
+    # Number of rows and columns after grouping
     nrows = Delegate('config')
     ncols = Delegate('config')
 
@@ -614,7 +662,14 @@ class Plate(utils.Updateable):
     wells = List(Well, resettable=True)
 
     def _wells_default(self):
-        return [Well(plate=self) for i in range(96)]
+        wells = []
+        for i in range(96):
+            # The absolute position on the physical plate with 12 columns,
+            # without grouping
+            pos_row = i // 12
+            pos_col = i % 12
+            wells.append(Well(plate=self, pos_row=pos_row, pos_col=pos_col))
+        return wells
 
     @cached_property
     def _get_well_groups(self):
@@ -692,6 +747,13 @@ class Plate(utils.Updateable):
     @on_trait_change('config, wells.leds, wells.leds.program, wells.leds.program.name')
     def _fire_updated(self):
         self.fire('updated')
+
+    # Event to indicate that the size requirement on the Arduino changed.
+    size_update = Event
+
+    @on_trait_change('wells:leds:program, led_types')
+    def fire_size_update(self, obj, trait, old, new):
+        self.size_update = True
 
     def default_traits_view(self):
         return View(
@@ -777,11 +839,10 @@ class WellProgramsViewer(AWellProgramsViewer):
 
     well = Instance(Well)
 
-    position = Delegate('well')
-
     # Overwrite colors: Use only LED colors, not step colors
-    colors = Property
+    colors = Property(depends_on='well.leds.program.steps')
 
+    @cached_property
     def _get_colors(self):
         colors = []
         for led in self.well.leds:
@@ -797,16 +858,20 @@ class WellProgramsViewer(AWellProgramsViewer):
 
     @on_trait_change('well.leds, well.leds.program.steps')
     def update_viewer(self):
-        if self.well is None:
-            return
-        programs = []
+        if self.well is not None:
+            programs = []
 
-        for led in self.well.leds:
-            if led.program is not None:
-                programs.append(led.program)
-        self.programs = programs
+            for led in self.well.leds:
+                if led.program is not None:
+                    programs.append(led.program)
+            if self.programs == programs:
+                # If the programs are identical from one well to the next,
+                # no plot update is fired, even if they are assigned to different
+                # LEDs. In that case, force one.
+                self.programs = []
+            self.programs = programs
+        self.plot.axes.set_title(self.title)
         self.update_legend()
-        self.set_title()
 
     def led_legend(self, led):
         """
@@ -836,17 +901,19 @@ class WellProgramsViewer(AWellProgramsViewer):
         self.legend = legend
         self.plot.draw()
 
-    @on_trait_change('programs:name')
-    def set_title(self):
+    title = Property(depends_on='well, programs.name')
+
+    @cached_property
+    def _get_title(self):
         names = [program.name for program in self.programs]
         title = ', '.join(names)
-        self.title = self.position + '\n' + title
-        return self.title
+        title = self.well.position + '\n' + title
+        return title
 
     @on_trait_change('legend[]')
     def set_legend(self):
         if not self.legend:
-            self.plot.axes.legend().remove()
+            self.plot.axes.get_legend().remove()
         else:
             self.plot.axes.legend(handles=self.legend, loc=(0, 0))
 
@@ -854,4 +921,6 @@ class WellProgramsViewer(AWellProgramsViewer):
 class NoWellProgramsViewer(AWellProgramsViewer):
     """ Empty Viewer to display when no Well is selected. """
     programs = []
-    view = View(Label('Select a well to display its associated programs.'))
+
+    def default_traits_view(self):
+        return View(Label('Select a well to display its associated programs.'))
