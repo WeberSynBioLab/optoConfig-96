@@ -145,7 +145,7 @@ class Program(utils.Counted, utils.Updateable):
     _unique_steps = Property(List, depends_on='steps')
 
     # The total duration of this Program's steps.
-    total_duration = Property(Int, depends_on='steps.duration')
+    total_duration = Property(Int, depends_on='steps.step.duration')
 
     @cached_property
     def _get_total_duration(self):
@@ -362,13 +362,24 @@ class Program(utils.Counted, utils.Updateable):
         self.assigned_leds = []
         self.stop_update('steps_updated')
 
+    def duplicate(self):
+        """ Return copy of the Program with the same Steps and parameters.
+        """
+        dup = Program()
+        steps = [step.step for step in self.steps]
+        dup.add_steps(steps)
+        dup.after_end_display = self.after_end_display
+        dup.name = "Copy of %s" % self.name
+        return dup
+
 
 class _Nullprogram(Program):
     counter = utils.BackfillID(start=0, maximum=0)
     after_end_display = 'Repeat the last step'
 
 
-nullprogram = _Nullprogram(name='nullprogram', steps=[nullstep])
+nullprogram = _Nullprogram(name='nullprogram')
+nullprogram.add_step(nullstep)
 
 
 class ProgramPlotData(HasTraits):
@@ -385,8 +396,9 @@ class ProgramPlotData(HasTraits):
     viewer = Any
 
     # Which steps to show pulsed? Set by an editor containing ProgramPlotData
-    steps_show_pulsed = Property
+    steps_show_pulsed = Property(depends_on='viewer.plot_update, viewer.plot_redraw')
 
+    @cached_property
     def _get_steps_show_pulsed(self):
         return [self.viewer.show_step_pulsed(step) for step in self.program.steps]
 
@@ -403,7 +415,7 @@ class ProgramPlotData(HasTraits):
         return [step._color for step in self.program.steps]
 
     # X values for individual steps, ignoring their position in the program.
-    _xs = Property(depends_on='program.steps_updated, program:_unique_steps:plot_update, viewer.show_pulsed_display')
+    _xs = Property(depends_on='viewer.plot_update, viewer.plot_redraw')
 
     @cached_property
     def _get__xs(self):
@@ -411,7 +423,7 @@ class ProgramPlotData(HasTraits):
 
     # X values for individual steps, taking into consideration their position in
     # the program and their start time.
-    xs = Property(depends_on='program.steps_updated, program:_unique_steps:plot_update, viewer.show_pulsed_display')
+    xs = Property(depends_on='viewer.plot_update, viewer.plot_redraw')
 
     @cached_property
     def _get_xs(self):
@@ -445,13 +457,13 @@ class ProgramPlotData(HasTraits):
 
         return xs
 
-    _ys = Property(depends_on='program.steps_updated, program:_unique_steps:plot_update, viewer.show_pulsed_display')
+    _ys = Property(depends_on='viewer.plot_update, viewer.plot_redraw')
 
     @cached_property
     def _get__ys(self):
         return [self.ys_for_step(step_n) for step_n in range(len(self.program.steps))]
 
-    ys = Property(depends_on='program.steps_updated, program:_unique_steps:plot_update, viewer.show_pulsed_display')
+    ys = Property(depends_on='viewer.plot_update, viewer.plot_redraw')
 
     @cached_property
     def _get_ys(self):
@@ -488,12 +500,15 @@ class AProgramEditor(HasTraits):
     """ Base class for Program Editors. """
 
 
-class MultiProgramViewer(HasTraits):
-    """ Allows editing of a single Program and displays a live plot. """
+class MultiProgramViewer(utils.Updateable):
+    """ Displays a live plot of a Program. """
 
     # --------------------------------------------------------------------------
     # Trait Definitions
     # --------------------------------------------------------------------------
+
+    # Is this viewer active?
+    active = Bool
 
     # The Programs to view.
     programs = List(Instance(Program), [])
@@ -511,20 +526,25 @@ class MultiProgramViewer(HasTraits):
     plot_update = Event
     plot_redraw = Event
 
-    @on_trait_change('programs:_unique_steps:plot_update, title')
+    @on_trait_change('programs:_unique_steps:plot_update, programs:name')
     def _fire_plot_update(self, obj, name, old, new):
-        if name == 'title':
+        # Do not fire a plot update while any programs are still updating
+        if self.programs and any(program.is_updating('steps_updated') for program in self.programs):
+            return
+        if name == 'name':
             signal = (None, name)
-            self.plot_update = signal
         elif name == 'plot_update':
             # If an update is fired from within a Step, relay information about
             # which step it was
             # new is (step_id, trait_name)
             signal = new
-            self.plot_update = signal
+        self.plot_update = signal
 
     @on_trait_change('programs.steps_updated, show_pulsed_display, limit_cycles, max_cycles')
     def _fire_plot_redraw(self):
+        # Do not fire a plot redraw while any programs are still updating
+        if self.programs and any(program.is_updating('steps_updated') for program in self.programs):
+            return
         self.plot_redraw = True
 
     show_pulsed_display = Enum(
@@ -647,13 +667,12 @@ class MultiProgramViewer(HasTraits):
     def _get_colors(self):
         return self.concatenate_from_plotdata('colors')
 
-    title = Str
+    title = Property(depends_on='programs.name')
 
-    @on_trait_change('programs.name')
-    def set_title(self):
+    @cached_property
+    def _get_title(self):
         names = [program.name for program in self.programs]
-        self.title = ', '.join(names)
-        return self.title
+        return ', '.join(names)
 
     def line_indices(self, step_id):
         """
@@ -691,6 +710,7 @@ class MultiProgramViewer(HasTraits):
 
     @on_trait_change('plot_update, plot_redraw')
     def update_figure(self, obj, name, old, signal):
+        self.start_update('drawing')
         self.plot._is_updating = True
         if name == 'plot_update':
             step_id, trait = signal
@@ -705,6 +725,7 @@ class MultiProgramViewer(HasTraits):
             self._update_figure(idx=None, nxt=None)
         self.plot.axes.set_title(self.title)
         self.plot.draw()
+        self.stop_update('drawing', signal=None)
 
     def _update_figure(self, idx, nxt):
         """
@@ -727,10 +748,12 @@ class MultiProgramViewer(HasTraits):
         Completely redraw the figure when steps are reordered, added, or deleted,
         or step duration changes.
         """
+        self.start_update('drawing')
         self.plot.set_xydata(self.xs, self.ys)
         for idx in self.indices():
             self.plot.lines[idx].set_linestyle(['-', '--'][self.steps_is_pulsed[idx]])
             self.plot.lines[idx].set_color(self.colors[idx])
+        self.stop_update('drawing', signal=None)
 
 
 class SingleProgramViewer(MultiProgramViewer):
@@ -779,6 +802,9 @@ class ProgramColumn(ObjectColumn):
         if self.name == 'invalid':
             return ['No', 'Yes'][getattr(object, self.name)]
 
+        if self.name == 'after_end_display':
+            return getattr(object, '_after_end')
+
         return super().get_value(object)
 
     def is_editable(self, object):
@@ -795,7 +821,8 @@ programlist_editor = TableEditor(
     columns=[
         ProgramColumn(name='ID', label='ID', editable=False),
         ProgramColumn(name='name', label='Name'),
-        ProgramColumn(name='invalid', label='Invalid'),
+        ProgramColumn(name='after_end_display', label='After End'),
+        ProgramColumn(name='invalid', label='Invalid')
     ],
     auto_size=True,
     deletable=False,  # Programs need to unassign themselves from wells when deleted
@@ -848,10 +875,11 @@ class ProgramListHandler(Controller):
             column.menu = Menu(
                 Action(name='New Program', action='info.object.new_program()'),
                 Action(name='Delete Selected', action='handler.object_delete_changed(info)'),
+                Action(name='Duplicate Selected', action='handler.object_duplicate_changed(info)'),
                 Action(name='Create dark Step with program duration', action='handler.dark_step(info)'),
-                Menu(*add_steps_items, name="Add program steps to ..."),
-                Menu(*led_assign_items, name="Assign Program to selected wells ..."),
-                Menu(*led_bulk_assign_items, name='Bulk assign selected Programs to selected wells ..."'))
+                Menu(*add_steps_items, name='Add program steps to ...'),
+                Menu(*led_assign_items, name='Assign Program to selected wells ...'),
+                Menu(*led_bulk_assign_items, name='Bulk assign selected Programs to selected wells ...'))
 
     @on_trait_change('app.plate.selected, app.all_programs.selected')
     def _allow_assign(self):
@@ -916,6 +944,15 @@ class ProgramListHandler(Controller):
 
             for plate in plates:
                 plate.stop_update('updated')
+
+    def object_new_changed(self, info):
+        info.object.new_program()
+
+    def object_duplicate_changed(self, info):
+        new_programs = [program.duplicate() for program in info.object.selected]
+        info.object.start_update('updated')
+        info.object.add_programs(new_programs)
+        info.object.stop_update('updated')
 
     def confirm_delete(self, program):
         """
@@ -990,7 +1027,7 @@ class ProgramListHandler(Controller):
         """
         Assign all selected programs to selected wells in the order of selection.
         """
-        pairs = zip(self.app.plate.selected_wells, info.object.selected)
+        pairs = zip(self.app.plate.selected_well_groups, info.object.selected)
         for well, program in pairs:
             well.assign_program(to_led, program)
 
@@ -1024,6 +1061,8 @@ class ProgramList(utils.Updateable):
 
     delete = Button(tooltip='Delete selected Programs.')
     delete_all = Button(tooltip='Delete all Programs.')
+    new = Button(tooltip='Create a new Program.')
+    duplicate = Button(tooltip='Duplicate selected Programs.')
     assign = Button(tooltip='Assign selected Program to an LED of selected wells.')
     bulk_assign = Button(tooltip='Assign selected Programs to an LED of selected wells, in the order of selection.')
     assign_to = Enum(values='_assign_to_choices', tooltip='LED to assign to.')
@@ -1047,6 +1086,10 @@ class ProgramList(utils.Updateable):
                 UItem('delete_all')),
             Spring(),
             VGroup(
+                UItem('new'),
+                UItem('duplicate', enabled_when='selected')),
+            Spring(),
+            VGroup(
                 HGroup(
                     UItem('assign'), UItem('bulk_assign')),
                 HGroup(
@@ -1058,11 +1101,18 @@ class ProgramList(utils.Updateable):
         """ Add a new Program to the list. """
         new = Program()
         self.programs.append(new)
-        return new.ID
+        return new
 
     def add_program(self, program):
         """ Add an existing Program to the list. """
         self.programs.append(program)
+
+    def add_programs(self, programs):
+        """ Add one or multiple existing Programs to the list. """
+        self.start_update('updated')
+        programs = utils.ensure_iterable(programs)
+        self.programs += programs
+        self.stop_update('updated')
 
     def delete_program(self, program):
         """ Remove an existing Program from the list. """

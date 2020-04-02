@@ -184,7 +184,8 @@ class Updateable(HasTraits):
     def stop_update(self, name='updated', signal=True):
         self._current_updates[name] -= 1
         Updateable._busycounter -= 1
-        self.fire(name, signal)
+        if signal is not None:
+            self.fire(name, signal)
 
     def fire(self, name='updated', signal=True):
         if not self.is_updating(name):
@@ -218,6 +219,7 @@ class Unit(HasTraits):
         super().__init__()
         self.add_trait('value_base_', typ)
 
+    @cached_property
     def _get_value_base(self):
         return self.value_base_
 
@@ -225,6 +227,7 @@ class Unit(HasTraits):
         self.value_base_ = value
         self.value_out_ = value / self.factors[self.unit]
 
+    @cached_property
     def _get_value_out(self):
         return self.value_out_
 

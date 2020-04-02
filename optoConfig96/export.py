@@ -36,8 +36,6 @@ from . import programs
 from . import resources
 from . import utils
 from . import config
-from . import constants
-
 
 SketchPathExistsWarning = utils.ConfirmationDialog()
 
@@ -313,10 +311,9 @@ class InoStepCollection(InoMemreq):
 
     def progmem(self):
         progmem_steps = []
-        for step in self. steps:
+        for step in self.steps:
             progmem_steps += step.progmem()
-        progmem_pointers = len(self.steps) * 2
-        return progmem_steps + [progmem_pointers]
+        return progmem_steps
 
     def ram(self):
         return 0
@@ -379,7 +376,8 @@ class InoProgram(InoMemreq):
     # --------------------------------------------------------------------------
 
     def progmem(self):
-        return [len(self)]
+        # One pointer (2 bytes) per step
+        return [len(self) * 2]
 
     def ram(self):
         return 0
@@ -508,6 +506,9 @@ class InoPlate(InoMemreq):
     def export(self):
         return self.plate_array()
 
+    def n_colors_var(self):
+        return 'const uint8_t N_COLORS = %d;' % self.n_leds
+
     # --------------------------------------------------------------------------
     # InoMemreq Interface
     # --------------------------------------------------------------------------
@@ -609,7 +610,7 @@ if (corr_fctr_ptr)
         corrections_pointers = 2 * len(self)
         corrections_base = 0
         if self.any_corrected:
-            corrections_base = 1037
+            corrections_base = 1049
         correction_arrays = []
         for led in self.led_types:
             correction_arrays += led.progmem()
@@ -813,7 +814,8 @@ class InoTemplate(utils.Updateable, InoMemreq):
             '// OPTOPLATE_CONFIG_CORRECTION_FACTORS': self.led_types.export_correction_arrays(),
             '// OPTOPLATE_CONFIG_PERFORM_INTENSITY_CORRECTION': self.led_types.export_correction_function(),
             '// OPTOPLATE_CONFIG_DONE_AFTER': self.done_after_var(),
-            '// OPTOPLATE_CONFIG_N_ADVANCED_ARR_SIZE': self.n_advanced_arr_size_var()
+            '// OPTOPLATE_CONFIG_N_ADVANCED_ARR_SIZE': self.n_advanced_arr_size_var(),
+            '// OPTOPLATE_CONFIG_N_COLORS': self.plate.n_colors_var()
         }
         populated = []
         with open(template, 'r') as tmpl:
@@ -880,22 +882,27 @@ class InoTemplate(utils.Updateable, InoMemreq):
             inopath = self.inopath()
             if inopath is not None:
                 self.start_update()
-                os.makedirs(inopath)
+                try:
+                    os.makedirs(inopath)
+                except FileExistsError:
+                    pass
                 fname = os.path.split(inopath)[-1] + '.ino'
                 fpath = os.path.join(inopath, fname)
                 with open(fpath, 'w') as f:
                     f.write(self.code)
                 ide_path = config.op96Config['arduino_path']
                 subprocess.Popen([ide_path, os.path.join(inopath, fname)])
-                self.stop_update()
         except PermissionError:
             msg = 'The Arduino IDE could not be opened due to a permission error.'
             msg += '\nPlease open the Arduino IDE manually and copy the code into a new sketch.'
             utils.error(message=msg, title='Could not open IDE')
         except Exception:
+            raise
             msg = 'The Arduino IDE could not be opened. Check if the correct path is set under Configuration > Preferences.'
             msg += '\nIf correcting the path does not resolve the problem, please open the Arduino IDE manually and copy the code into a new sketch.'
             utils.error(message=msg, title='Could not open IDE')
+        finally:
+            self.stop_update()
         return True
 
     def done_after_var(self):
@@ -903,7 +910,7 @@ class InoTemplate(utils.Updateable, InoMemreq):
 
     def n_advanced_arr_size_var(self):
         """
-        Create a constant to store the size of an array represenenting whether a
+        Create a constant to store the size of an array representing whether a
         step was advanced in the current loop.
 
         To save memory, this is done in a bit array. The required number of bytes
@@ -919,13 +926,18 @@ class InoTemplate(utils.Updateable, InoMemreq):
 
     def progmem(self):
         # Base without any Steps or programs defined
-        # The + 3 comes from program assignment: for some reason, when there are
-        # no programs assigned to any well, the compiler optimizes something away ...
-        base = [6961 + 3]
+        base = [6705]
+        # If floating point division is included, this will also raise the sketch
+        # size
+        float_required = False
+        if self.hardware.fan_speed not in (0, 255):
+            # Setting anything than 0 or 255 requires massively more space?
+            base.append(296)
+        base.append(bytesize(self.done_after))
         return base + self.steps.progmem() + self.programs.progmem() + self.plate.progmem() + self.led_types.progmem()
 
     def space_requirement(self):
-        return self.align(self.progmem(), word_size=2)
+        return self.align(self.progmem())
 
     def ram(self):
         return self.steps.ram() + self.programs.ram() + self.plate.ram()

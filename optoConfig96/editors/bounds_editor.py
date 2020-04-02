@@ -47,19 +47,25 @@ from traitsui.qt4.extra.bounds_editor import BoundsEditor as OriginalBoundsEdito
 
 class _BoundsEditor(_OriginalBoundsEditor):
     def update_low_on_enter(self):
-        text = self._label_lo.text().replace(',', '.')
-        self._label_lo.setText(text)
-        low = eval(six.text_type(self._label_lo.text()).strip())
-        if low < self.min:
-            self._label_lo.setText(str(self.min))
+        try:
+            text = self._label_lo.text().replace(',', '.')
+            self._label_lo.setText(text)
+            low = eval(six.text_type(self._label_lo.text()).strip())
+            if low < self.min:
+                self._label_lo.setText(str(self.min))
+        except:
+            pass
         super().update_low_on_enter()
 
     def update_high_on_enter(self):
-        text = self._label_hi.text().replace(',', '.')
-        self._label_hi.setText(text)
-        high = eval(six.text_type(self._label_hi.text()).strip())
-        if high > self.max:
-            self._label_hi.setText(str(self.max))
+        try:
+            text = self._label_hi.text().replace(',', '.')
+            self._label_hi.setText(text)
+            high = eval(six.text_type(self._label_hi.text()).strip())
+            if high > self.max:
+                self._label_hi.setText(str(self.max))
+        except:
+            pass
         super().update_high_on_enter()
 
 

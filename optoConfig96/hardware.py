@@ -37,7 +37,7 @@ def truncate_entered(value):
 
 
 class Optoplate(HasTraits):
-    fan_speed = UInt8(100, tooltip='Fan speed, from 0 (off) to 255 (maximum).')
+    fan_speed = UInt8(255, tooltip='Fan speed, from 0 (off) to 255 (maximum).')
 
     def as_dict(self):
         return {'fan_speed': self.fan_speed}

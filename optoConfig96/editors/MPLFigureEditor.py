@@ -20,7 +20,11 @@ class OptoPlateCanvas(FigureCanvas):
     def resizeEvent(self, event):
         """ Keep labels in view on resize. """
         super().resizeEvent(event)
-        self.figure.tight_layout()
+        try:
+            self.figure.tight_layout()
+        except ValueError:
+            # Resize not possible
+            pass
 
 
 class _MPLFigureEditor(Editor):

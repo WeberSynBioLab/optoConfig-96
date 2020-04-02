@@ -23,10 +23,20 @@ from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 
 from .application import Application
+from .plates import PlateConfig
 
 def main():
     app = Application()
-    app.configure_traits()
+    # When opening the application, the user selects the plate configuration
+    # for the first time. No programs are assigned, and asking whether
+    # resetting them is okay is not required.
+    config = PlateConfig()
+    config._no_redraw_confirm = True
+    result = config.edit_traits().result
+    config._no_redraw_confirm = False
+    app.plate.config = config
+    if result:
+        app.configure_traits()
     return app
 
 

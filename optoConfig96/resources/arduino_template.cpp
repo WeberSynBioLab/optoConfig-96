@@ -120,54 +120,175 @@ class Adafruit_TLC5947 {
 const uint8_t N_TLC5947 = 12;
 const uint8_t oe  = 7;  // set to -1 to not use the enable pin (its optional)
 
-const uint8_t BLUE = 0;
-const uint8_t RED = 1;
-const uint8_t FARRED = 2;
+const uint8_t LED1 = 0;
+const uint8_t LED2 = 1;
+const uint8_t LED3 = 2;
+
+// Plate configuration: 1-, 2-, or 3-color?
+// OPTOPLATE_CONFIG_N_COLORS
 
 
 Adafruit_TLC5947 tlc = Adafruit_TLC5947(N_TLC5947);
 
-void setBlue(uint8_t well, uint16_t intensity)
+
+/*
+    Set intensity of first LED.
+    1-color plate: blue
+    2-color plate: far red
+    3-color plate: blue
+
+    @params well The number of the well to set.
+    @params intensity Intensity to set the LED to.
+*/
+void setLED1(uint8_t well, uint16_t intensity)
 {
-    uint16_t bluePosition = (uint16_t)((int)(well/12) + 8*(well%12));
-    tlc.setPWM(bluePosition, intensity);   //Set Blue
+    uint16_t led1position = (uint16_t)((int)(well/12) + 8*(well%12));
+    tlc.setPWM(led1position, intensity);
 }
 
 
-void setRed(uint8_t well, uint16_t intensity)
+/*
+    Set intensity of second LED.
+    1-color plate: blue
+    2-color plate: far red
+    3-color plate: red
+
+    @params well The number of the well to set.
+    @params intensity Intensity to set the LED to.
+*/
+void setLED2(uint8_t well, uint16_t intensity)
 {
-    uint16_t redPosition = (uint16_t)((int)(well/12) + 8*(well%12)+96);
-    tlc.setPWM(redPosition, intensity);   //Set Red
+    uint16_t led2position = (uint16_t)((int)(well/12) + 8*(well%12)+96);
+    tlc.setPWM(led2position, intensity);
 }
 
 
-void setFarRed(uint8_t well, uint16_t intensity)
+/*
+    Set intensity of third LED.
+    1-color plate: blue
+    2-color plate: red
+    3-color plate: far red
+
+    @params well The number of the well to set.
+    @params intensity Intensity to set the LED to.
+*/
+void setLED3(uint8_t well, uint16_t intensity)
 {
-    uint16_t fRedPosition = (uint16_t)(well+192);
-    tlc.setPWM(fRedPosition, intensity);   //Set Far-red
+    uint16_t led3position = (uint16_t)(well+192);
+    tlc.setPWM(led3position, intensity);
 }
 
 
+
+/*
+    Set intensity of an LED. Which drivers are addressed specifically depends
+    on the plate color configuration.
+
+    @params well The number of the well to set.
+    @params color Index of the color to set.
+    @params intensity Intensity to set the LEDs to.
+*/
 void set(uint8_t well, uint8_t color, uint16_t intensity)
 {
-    if (color == BLUE)
+    if (N_COLORS == 1)
     {
-        setBlue(well, intensity);
-    } else if (color == RED)
+        set_1color(well, intensity);
+    } else if (N_COLORS == 2)
     {
-        setRed(well, intensity);
-    } else if (color == FARRED)
+        set_2color(well, color, intensity);
+    } else if (N_COLORS == 3)
     {
-        setFarRed(well, intensity);
+        set_3color(well, color, intensity);
     }
 }
 
 
+/*
+    Set intensity for a well in the 1-color plate configuration.
+
+    All three LEDs are blue LEDs. LED 1 and 2 are dimmed, because both drivers
+    together deliver 60 mA, but the LED can handle 50 mA.
+
+    @params well The number of the well to set.
+    @params intensity Intensity to set the LEDs to.
+*/
+void set_1color(uint8_t well, uint16_t intensity)
+{
+    // At a setting of 4095, the blue LED connected to drivers 1+2 will receive
+    // more than the 50 mA it is specified for. To prevent this, scale back the
+    // intensity.
+    uint16_t dimmed_int = (uint16_t)(intensity * float(3300.0/4095.0));
+    setLED1(well, dimmed_int);
+    setLED2(well, dimmed_int);
+    setLED3(well, intensity);
+}
+
+
+/*
+    Set intensity for a well in the 2-color plate configuration.
+
+    LED1 and LED2 are far red.
+    LED3 is red.
+
+    @params well The number of the well to set.
+    @params color Index of the color to set.
+    @params intensity Intensity to set the LEDs to.
+*/
+void set_2color(uint8_t well, uint8_t color, uint16_t intensity)
+{
+    if (color == 0)
+    {
+        // red
+        setLED3(well, intensity);
+    } else if (color == 1)
+    {
+        // far red
+        setLED1(well, intensity);
+        setLED2(well, intensity);
+    }
+}
+
+
+/*
+    Set intensity for a well in the 3-color plate configuration.
+
+    LED1 is blue.
+    LED2 is red.
+    LED3 is far red.
+
+    @params well The number of the well to set.
+    @params color Index of the color to set.
+    @params intensity Intensity to set the LEDs to.
+*/
+void set_3color(uint8_t well, uint8_t color, uint16_t intensity)
+{
+    if (color == 0)
+    {
+        // blue
+        setLED1(well, intensity);
+    } else if (color == 1)
+    {
+        // red
+        setLED2(well, intensity);
+    } else if (color == LED3)
+    {
+        // far red
+        setLED3(well, intensity);
+    }
+}
+
+
+/*
+    Set intensity of all LEDs.
+
+    @params well The number of the well to set.
+    @params intensity Intensity to set the LEDs to.
+*/
 void setAll(uint8_t well, uint16_t intensity)
 {
-    setBlue(well, intensity);
-    setRed(well, intensity);
-    setFarRed(well, intensity);
+    setLED1(well, intensity);
+    setLED2(well, intensity);
+    setLED3(well, intensity);
 }
 
 
@@ -476,7 +597,7 @@ bool advance_step(uint32_t &cur_millis, uint16_t program_id)
 
     @params intensity Intensity setting before correction
     @params well Index of the well.
-    @params color Index of the LED.
+    @params corr_fctr_ptr Pointer to the relevant correction matrix.
 */
 uint16_t correct_intensity(uint16_t intensity, uint8_t well, const uint16_t* const corr_fctr_ptr)
 {
@@ -547,7 +668,7 @@ void loop()
     // Without it, the first pulse will be skipped, and unpulsed steps will never
     // turn on. This happens because 'advanced' is false, step_n remains 0.
     // cur_millis and s_prev_millis are both 0, so old_state == new_state.
-    // Thus, the s_changed flag never gets set.
+    // Thus, the changed flag never gets set.
     static bool s_first_loop_over = false;
 
     // LED states are determined in loop (n-1), and written in loop (n),
@@ -588,7 +709,7 @@ void loop()
 
     for (uint8_t well = 0; well < 96; well++)
     {
-        for (uint8_t color = 0; color < 3; color++)
+        for (uint8_t color = 0; color < N_COLORS; color++)
         {
             // Is there a change in intensity for this particular LED?
             bool this_changed = false;

@@ -46,16 +46,42 @@ class StepHandler(Handler):
         """
         info.pulse_on_ui._ui._editors[0].invalid = info.object.pulse_on_invalid
 
+    def object_duration_changed(self, info):
+        info.pulse_on_ui._ui._editors[0].invalid = info.object.pulse_on_invalid
+        info.duration_ui._ui._editors[0].invalid = info.object.duration_short_invalid or info.object.duration_long_invalid
 
-class AStep(HasTraits):
+
+class AStep(utils.Updateable):
     """ Base class for a Step-like object. """
 
     # Event to indicate any parameter changes
     dirtied = Event
 
+    # Core parameters for definition of a Step
+    _core_params = (
+            'intensity',
+            'duration', 'duration_unit',
+            'is_pulsed',
+            'pulse_on', 'pulse_on_unit',
+            'pulse_off', 'pulse_off_unit')
+
+    # Parameters which set the dirty flag, in addition to the _core_params
+    _dirty_params = (
+            'color',
+            'name'
+        )
+
     def __setattr__(self, name, value):
-        super().__setattr__('dirtied', True)
+        if name in self._core_params or name in self._dirty_params:
+            super().__setattr__('dirtied', True)
         super().__setattr__(name, value)
+
+    # Event to indicate that the size requirement on the Arduino changed.
+    size_update = Event
+
+    @on_trait_change('intensity, duration, is_pulsed, pulse_on, pulse_off')
+    def fire_size_update(self):
+        self.size_update = True
 
 
 class BaseStep(AStep):
@@ -95,13 +121,7 @@ class BaseStep(AStep):
 
     def copy_params(self, to):
         """ Copy one step's parameters to another step. """
-
-        for param in (
-            'intensity',
-            'duration', 'duration_unit',
-            'is_pulsed',
-            'pulse_on', 'pulse_on_unit',
-            'pulse_off', 'pulse_off_unit'):
+        for param in (self._core_params):
                 setattr(to, param, getattr(self, param))
 
     # Input validation
@@ -278,7 +298,7 @@ class Step(utils.Counted, BaseStep):
     # show as pulsed, or constant?
     # Very long steps with pulsing may be visually cluttered.
     show_pulsed = Bool(True)
-    _show_pulsed = Property(depends_on='is_pulsed, show_pulsed, pulse_on, pulse_off')
+    _show_pulsed = Property(depends_on='is_pulsed, show_pulsed')
 
     @cached_property
     def _get__show_pulsed(self):
@@ -354,8 +374,8 @@ class Step(utils.Counted, BaseStep):
         self.color = tuple(np.random.randint(0, 256, 3))
 
     def __repr__(self):
-        string = 'Step #{ID} ({name})'
-        string = 'Dur: {duration}, ON: {pulse_on}, OFF: {pulse_off}, INT: {intensity}'
+        string = 'Step #{ID} ({name}) '
+        string += 'Dur: {duration}, ON: {pulse_on}, OFF: {pulse_off}, INT: {intensity}'
         return string.format(
             ID=self.ID,
             duration=self.duration,
@@ -422,7 +442,7 @@ class Step(utils.Counted, BaseStep):
 
     @cached_property
     def _get__xs_pulsed(self):
-        if not self.is_pulsed or self.pulse_on == 0 or self.pulse_off == 0:
+        if not self.is_pulsed or self.pulse_on == 0 or self.pulse_off == 0 or self.duration == 0:
             return np.array((0, self.duration))
         else:
             xs = [0]
@@ -498,6 +518,9 @@ class Step(utils.Counted, BaseStep):
             True for elements of `times` which are in the ON phase.
         """
         # Edge cases:
+        if not self.is_pulsed:
+            return np.ones_like(times).astype(np.bool)
+
         if self.pulse_on == 0 and self.pulse_off == 0:
             # ON is 0 and OFF is 0: not pulsed, always on
             return np.ones_like(times).astype(np.bool)
@@ -513,15 +536,16 @@ class Step(utils.Counted, BaseStep):
         is_on = times < period * cycles + self.pulse_on
         # If the step is switching at the end of its duration, do not show this:
         # the next step will start
-        if is_on[-2] != is_on[-1]:
-            is_on[-1] = is_on[-2]
+        if is_on.shape[0] > 1:
+            if is_on[-2] != is_on[-1]:
+                is_on[-1] = is_on[-2]
 
         return is_on
 
     @on_trait_change('name, duration, intensity, show_pulsed, is_pulsed, pulse_on, pulse_off, color')
     def fire_plot_update(self, obj, name, old, new):
         signal = (self.ID, name)
-        self.plot_update = signal
+        self.fire('plot_update', signal)
 
     def delete(self):
         """
@@ -537,19 +561,7 @@ class Step(utils.Counted, BaseStep):
         Return copy of the Step with the same parameters.
         """
         dup = Step()
-        dup.copy_traits(self, traits=(
-            'duration',
-            'is_pulsed',
-            'show_pulsed',
-            'pulse_on',
-            'pulse_off',
-            'intensity'))
-        for unit_param in ('duration', 'pulse_on', 'pulse_off'):
-            param_name = unit_param + '_ui'
-            param = getattr(self, param_name)
-            dup_param = getattr(dup, param_name)
-            dup_param.unit = param.unit
-
+        self.copy_params(dup)
         dup.name = "Copy of %s" % self.name
         return dup
 
@@ -799,7 +811,18 @@ class StepListHandler(Controller):
             ID of the program to assign to.
         """
         if to_program == 'new':
-            to_program = self.app.all_programs.new_program()
+            from .programs import Program
+            prg = Program()
+            to_program = prg.ID
+            from .assistants import NameProgramAssistant
+            assistant = NameProgramAssistant()
+            assistant.name = prg.name
+            result = assistant.edit_traits().result
+            if not result:
+                return
+            else:
+                prg.name = assistant.name
+                self.app.all_programs.add_program(prg)
 
         for program in self.app.all_programs.programs:
             if program.ID == to_program:
@@ -889,7 +912,7 @@ class StepList(utils.Updateable):
         """ Add a new Step to the list. """
         new = Step()
         self.steps.append(new)
-        return new.ID
+        return new
 
     def add_step(self, step):
         """ Add an existing Step to the list. """

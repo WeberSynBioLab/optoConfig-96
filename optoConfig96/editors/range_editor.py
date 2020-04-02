@@ -19,10 +19,12 @@
 """
 Fix a bug with the TraitsUI RangeEditor, which results in a crash when numbers
 are entered with a comma as a decimal separator.
-
 This is treated as a tuple and falls through the default RangeEditor's input
 checks.
+Also provides extra validation: max cannot be exceeded by entering values in the
+text box.
 """
+import six
 
 from traitsui.api import RangeEditor as OriginalRangeEditor
 from traitsui.qt4.range_editor import SimpleSliderEditor
@@ -35,10 +37,12 @@ class FixedQtRangeEditor(SimpleSliderEditor):
         try:
             text = self.control.text.text().replace(',', '.')
             self.control.text.setText(text)
-            super().update_object_on_enter()
-        except TypeError:
+            value = eval(six.text_type(self.control.text.text()).strip())
+            if value > self.high:
+                self.control.text.setText(str(self.high))
+        except Exception:
             pass
-
+        super().update_object_on_enter()
 
 class RangeEditor(OriginalRangeEditor):
     def _get_simple_editor_class(self):
