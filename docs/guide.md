@@ -11,12 +11,12 @@ User guide for version 1.0.1.
 optoConfig-96 is available as a Python package or as standalone bundles for Windows 10 and MacOS 10.15. Installation should not take more than 5 minutes. To upload the generated code to the Arduino Micro controlling optoPlate-96, the Arduino IDE must be installed separately. It is available for Windows, Mac and Linux at [the website of the Arduino project](https://www.arduino.cc/en/main/software).
 
 ## Windows 10
-1. Download the windows_optoConfig-96-1.0.0.zip archive from the [GitHub _Releases_ page](https://github.com/WeberSynBioLab/optoConfig-96/releases).
+1. Download the windows_optoConfig-96-x.x.x.zip archive from the [GitHub _Releases_ page](https://github.com/WeberSynBioLab/optoConfig-96/releases), where `x.x.x` denotes the current version.
 1. Extract the archive to a location of your choice.
 1. Run _optoConfig-96.exe_. You may be asked to allow execution of the application.
 
 ## MacOS
-1. Download the macos_optoConfig-96-1.0.0.dmg disk image from the [GitHub _Releases_ page](https://github.com/WeberSynBioLab/optoConfig-96/releases).
+1. Download the macos_optoConfig-96-x.x.x.dmg disk image from the [GitHub _Releases_ page](https://github.com/WeberSynBioLab/optoConfig-96/releases), where `x.x.x` denotes the current version.
 1. Open the disk image and drag the application to the _Applications_ folder as indicated (or to another location of your choice).
 1. You may be asked to allow execution of a foreign application. To do this, go to *System Preferences > Security & Privacy > General* and grant optoConfig-96 permission to run. Administrator rights may be required depending on your security settings.
 
