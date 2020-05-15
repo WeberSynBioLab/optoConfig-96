@@ -456,7 +456,7 @@ class Application(CanSaveMixin):
 
     dirty = Bool(False)
 
-    @on_trait_change('all_steps.steps.dirtied, all_programs.programs.dirtied, plate.config, plate.wells.leds.program, hardware')
+    @on_trait_change('all_steps.steps.dirtied, all_programs.programs.dirtied, plate.config, plate.wells.leds.program, hardware.fan_speed')
     def set_dirty(self, obj, trait, old, new):
         self.dirty = True
 
