@@ -25,7 +25,7 @@ setuptools.setup(
     install_requires=[
         'traits>=5.2.0',
         'traitsui>=6.1.3',
-        'PyQt5==5.14.0',
+        'PyQt5>=5.14.0',
         'pygments>=2.5.2',
         'numpy>=1.17.4',
         'matplotlib>=3.1.1'
