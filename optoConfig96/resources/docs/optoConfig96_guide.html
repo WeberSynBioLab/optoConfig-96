@@ -23,7 +23,9 @@
 <h1 class="title">optoConfig-96 User Guide</h1>
 </header>
 <h1 id="optoconfig-96---interactive-configuration-of-experiments-using-the-optoplate-96">optoConfig-96 - Interactive configuration of experiments using the optoPlate-96</h1>
-<p>User guide for version 1.0.1.</p>
+<p>User guide for version 1.0.2.</p>
+<p>If optoConfig-96 was useful to you, please consider citing the paper:</p>
+<p>Thomas, OS, Hörner, M &amp; Weber, W: A graphical user interface to design high-throughput optogenetic experiments with the optoPlate-96. <em>Nat Protoc</em> (2020). https://doi.org/10.1038/s41596-020-0349-x</p>
 <h1 id="installation-instructions">Installation Instructions</h1>
 <p>optoConfig-96 is available as a Python package or as standalone bundles for Windows 10 and MacOS 10.15. Installation should not take more than 5 minutes. To upload the generated code to the Arduino Micro controlling optoPlate-96, the Arduino IDE must be installed separately. It is available for Windows, Mac and Linux at <a href="https://www.arduino.cc/en/main/software">the website of the Arduino project</a>.</p>
 <h2 id="windows-10">Windows 10</h2>
@@ -150,7 +152,7 @@
 <p>Opens a dialog in which new Steps can be created by linearly interpolating between boundaries for each parameter. The default values for the start and end values correspond to the parameters of the first and last selected Step, respectively. Interpolation can be used to quickly create a gradient illumination pattern, for instance with increasing or decreasing intensity over time.</p>
 <ul>
 <li><p><em>Name:</em></p>
-<p>generate Steps with names Interpolation_1, Interpolation_2, …</p></li>
+<p>Set a prefix to use for generated Steps. The settings shown above will generate Steps with names Interpolation_1, Interpolation_2, …</p></li>
 <li><p><em>Start values, End values:</em></p>
 <p>Set the parameter values to interpolate between here.</p></li>
 <li><p><em>Interpolation steps</em>:</p>
@@ -286,7 +288,7 @@
 <blockquote>
 <p>The well viewer displays all Programs in a well at once.</p>
 </blockquote>
-<p>The colors that are used for the LEDs can be set under <em>Configuration &gt; Configure Plate…</em> and is independent from the color set for the individual Steps.</p>
+<p>The colors that are used for the LEDs can be set under <em>Configuration &gt; Configure Plate…</em> and these are independent from the colors set for the individual Steps.</p>
 <h4 id="display-settings-2">Display Settings</h4>
 <p>The display settings are the same as in the Program Editor, with one addition:</p>
 <ul>
@@ -345,7 +347,7 @@
 <li><p><em>total_steps</em></p>
 <p>The number of steps in the Program assigned to this well and LED.</p></li>
 <li><p><em>step</em></p>
-<p>Each Step in a Program results in the generation of an additional column. This column holds the name of the Step.</p></li>
+<p>Each Step in a Program results in the generation of an additional row. This column holds the name of the Step.</p></li>
 <li><p><em>step_no</em></p>
 <p>The total number of Steps in the Program.</p></li>
 <li><p><em>step_id</em></p>

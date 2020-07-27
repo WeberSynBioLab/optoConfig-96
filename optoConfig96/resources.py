@@ -72,11 +72,30 @@ class Examples(HasTraits):
     )
 
 
+class License(HasTraits):
+
+    license = Str
+
+    def _license_default(self):
+        with open(os.path.join(search_path, 'LICENSE.txt')) as flic:
+            license = flic.read()
+        return license
+
+    view = opView(
+        UItem('license', style='readonly'), scrollable=True)
+
+
 class About(HasTraits):
 
     info = Str
 
-    license = Str
+    license = Instance(License)
+
+    citation = Str('If optoConfig-96 was useful to you, please consider citing the paper:')
+    authors = Str('Thomas, OS, Hörner, M & Weber, W:')
+    title = Str('A graphical user interface to design high-throughput optogenetic experiments with the optoPlate-96')
+    journal = Str('Nat Protoc (2020)')
+    doi = Str('https://doi.org/10.1038/s41596-020-0349-x')
 
     def _info_default(self):
         from . import version
@@ -86,13 +105,22 @@ class About(HasTraits):
         return info
 
     def _license_default(self):
-        with open(os.path.join(search_path, 'LICENSE.txt')) as flic:
-            license = flic.read()
-        return license
+        return License()
 
     view = opView(
         UItem('info', style='readonly'),
-        UItem('license', style='custom', width=500, height=500),
+        Group(
+            UItem('citation', style='readonly'),
+            UItem('authors', style='readonly', style_sheet='*{font-weight:bold}'),
+            UItem('title', style='readonly', style_sheet='*{font-style:italic}'),
+            UItem('journal', style='readonly', style_sheet='*{font-style:italic}'),
+            UItem('doi'),
+            show_border=True
+        ),
+        UItem('license', editor=InstanceEditor(), style='custom'),
         buttons=[OKButton],
-        title='About optoConfig-96'
-        )
+        title='About optoConfig-96',
+        resizable=True,
+        width=600,
+        height=700
+)

@@ -1,7 +1,11 @@
 
 # optoConfig-96 - Interactive configuration of experiments using the optoPlate-96
 
-User guide for version 1.0.1.
+User guide for version 1.0.2.
+
+If optoConfig-96 was useful to you, please consider citing the paper:
+
+Thomas, OS, Hörner, M & Weber, W: A graphical user interface to design high-throughput optogenetic experiments with the optoPlate-96. *Nat Protoc* (2020). https://doi.org/10.1038/s41596-020-0349-x
 
 # Installation Instructions
 
@@ -167,7 +171,7 @@ The application window is separated into a few distinct areas:
 
     - *Name:*
 
-        generate Steps with names Interpolation_1, Interpolation_2, ...
+        Set a prefix to use for generated Steps. The settings shown above will generate Steps with names Interpolation_1, Interpolation_2, ...
 
     - *Start values, End values:*
 
@@ -359,7 +363,7 @@ To remove Programs from an LED, right click the respective well and choose *Clea
 ### Well Viewer
 > The well viewer displays all Programs in a well at once.
 
-The colors that are used for the LEDs can be set under *Configuration > Configure Plate...* and is independent from the color set for the individual Steps.
+The colors that are used for the LEDs can be set under *Configuration > Configure Plate...* and these are independent from the colors set for the individual Steps.
 
 #### Display Settings
 
@@ -451,7 +455,7 @@ The exported csv has one row for each well, LED type and Step, and columns for P
 
 - *step*
 
-    Each Step in a Program results in the generation of an additional column. This column holds the name of the Step.
+    Each Step in a Program results in the generation of an additional row. This column holds the name of the Step.
 
 - *step_no*
 
