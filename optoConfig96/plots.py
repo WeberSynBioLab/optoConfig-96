@@ -37,8 +37,6 @@ class StepPlotHandler(Handler):
         """ Update selectable display range when Step settings change. """
         info.xlimits.max = info.object.xlimits_max
         info.xlimits.update_editor()
-        # info.xlimits.update_low_on_enter()
-        # info.xlimits.update_high_on_enter()
 
 
 class StepPlot(utils.Updateable):
@@ -161,19 +159,12 @@ class StepPlot(utils.Updateable):
         if math.isclose(xlimits_max, 0, rel_tol=0, abs_tol=1e-7):
             xlimits_max = 1
 
-        # # Limit Range that can be shown by selected unit
-        # # if self.xunit != 'd':
-        # #     xlimits_max = min(10000, xlimits_max)
-
         self.xlimits_max = xlimits_max
         xmax_new = xlimits_max
 
         # # Reset display limits
-        # self._xminmaxdisablelistener = True
         self._xmin = 0
         self._xmax = min(xmax_new, xlimits_max)
-        # self._xminmaxdisablelistener = False
-        # self.set_xlim()
 
     def update_ylimits(self):
         self.set_ylim(0, max(1, self.ydata_max * 1.1))
@@ -285,15 +276,6 @@ class StepPlot(utils.Updateable):
     def wait_for_update(self):
         if not self._is_updating:
             self.draw()
-        # if not self._is_updating:
-        #     self.figure.canvas.draw()
-        # self._is_updating = True
-        # if self.update_thread and self.update_thread.isAlive():
-        #     self.update_thread.cancel = True
-
-        # self.update_thread = UpdateThread(timer=0.5)
-        # self.update_thread.draw = self.draw
-        # self.update_thread.start()
 
     def draw(self):
         try:

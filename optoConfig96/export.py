@@ -867,17 +867,7 @@ class InoTemplate(utils.Updateable, InoMemreq):
         version = self.query_version()
         if version is None:
             return False
-        # version_valid = self.version_valid(version)
-        # if not version_valid:
-        #     msg = "'%s' does not seem to point to a suitable Arduino IDE version." % self.ide_path
-        #     msg += '\nIf this path does not look correct, you may change it in the preferences.'
-        #     msg += '\noptoConfig96 was tested with the following versions:'
-        #     for tested_ver in constants.ARDUINO_TESTED_VERSIONS:
-        #         msg += '\n  * %s' % '.'.join([str(x) for x in tested_ver])
-        #     msg += '\nThere is a reasonable chance it will work with other versions as well.'
-        #     msg += '\nYou may manually copy and paste the code into a new Arduino sketch, but make sure to verify the programs run as expected.'
-        #     utils.error(message=msg, title='Could not open IDE')
-        #     return False
+
         try:
             inopath = self.inopath()
             if inopath is not None:

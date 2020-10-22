@@ -44,6 +44,7 @@ class FixedQtRangeEditor(SimpleSliderEditor):
             pass
         super().update_object_on_enter()
 
+
 class RangeEditor(OriginalRangeEditor):
     def _get_simple_editor_class(self):
         return FixedQtRangeEditor

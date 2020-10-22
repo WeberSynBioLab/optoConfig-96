@@ -288,86 +288,6 @@ class TimeUnit(Unit):
         return value
 
 
-# class IntensityUnitHandler(Handler):
-#     def init(self, info):
-#         self.object_slider_wants_update_changed(info)
-
-#     def object_slider_wants_update_changed(self, info):
-#         """ Convert range editor between float and integer mode and handle limits. """
-#         if info.object.unit == 'au':
-#             info.value_out.format = '%d'
-#             info.value_out.high = info.object.slider_max
-#         else:
-#             info.value_out.format = '%.1f'
-#             info.value_out.high = info.object.slider_max
-
-
-# class IntensityUnit(Unit):
-#     config = Instance(config.Config, config.op96Config)
-#     slider_max = Property
-
-#     def _get_slider_max(self):
-#         if self.unit == 'au':
-#             return 4095
-#         else:
-#             return 4095 / self.factors[self.unit]
-#     unit = Enum('au', 'µmol/s')
-
-#     factors = Property
-
-#     def _get_factors(self):
-#         factors = {
-#             'au': 1,
-#             'µmol/s': self.config['au_to_umolpers']}
-#         return factors
-
-#     slider_wants_update = Event
-
-#     @on_trait_change('unit, config.options.changed')
-#     def convert(self):
-#         # Updating the slider maximum may truncate the value
-#         # To prevent this, convert before updating the slider.
-#         converted_value = self.value_base / self.factors[self.unit]
-#         self.slider_wants_update = True
-#         self.value_out = converted_value
-
-#     view = View(
-#         HGroup(
-#             Item(
-#                 'value_out',
-#                 # Initialize high limit to value to prevent truncation
-#                 # before the handler kicks in.
-#                 editor=RangeEditor(high_name='slider_max'),
-#                 style='custom',
-#                 show_label=False),
-#             Item('unit', show_label=False)),
-#         handler=IntensityUnitHandler())
-
-#     def __init__(self):
-#         super().__init__(typ=UInt12)
-
-#     def _get_value_out(self):
-#         """
-#         Handle rounding of au to whole integers.
-#         """
-#         val = super()._get_value_out()
-#         if self.unit == 'au':
-#             val = int(val)
-#         return val
-
-#     def _validate_value_out(self, value):
-#         """
-#         If units are au, only allow integers to be entered.
-#         """
-#         value = super()._validate_value_out(value)
-#         if (self.unit == 'au' and not value.is_integer()):
-#             try:
-#                 value = int(value)
-#             except TypeError:
-#                 raise TraitError('arbitrary units must be convertable to whole integers')
-#         return value
-
-
 class Popup(HasTraits):
     message = Str
     title = Str('Error!')
@@ -437,10 +357,10 @@ class ConfirmationDialog(HasTraits):
             UItem('message', style='readonly'),
             UItem('10')),
         buttons=[
-                Action(name='Yes', action='yes'),
-                Action(name='Yes, do not ask again', action='always'),
-                Action(name='No', action='no'),
-                Action(name='Cancel ', action='cancel')],
+            Action(name='Yes', action='yes'),
+            Action(name='Yes, do not ask again', action='always'),
+            Action(name='No', action='no'),
+            Action(name='Cancel ', action='cancel')],
         kind='livemodal',  # must be livemodal to update `result`
         handler=ConfirmationDialogHandler,
         title='Continue?')

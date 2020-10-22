@@ -40,7 +40,6 @@ raises an unhandled TypeError - fixed here.
 
 import six
 
-from traits.api import TraitError
 from traitsui.qt4.extra.bounds_editor import _BoundsEditor as _OriginalBoundsEditor
 from traitsui.qt4.extra.bounds_editor import BoundsEditor as OriginalBoundsEditor
 

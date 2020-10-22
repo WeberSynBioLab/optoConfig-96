@@ -40,14 +40,6 @@ from . import testmode
 
 class ApplicationHandler(Controller, SaveHandler):
     def init(self, info):
-        # # Mutually provide handlers of all_steps and all_programs with
-        # # information about the main application state.
-        # handler_all_steps = info.all_steps._ui.handler
-        # handler_all_steps.app = info.object
-
-        # handler_all_programs = info.all_programs._ui.handler
-        # handler_all_programs.app = info.object
-
         # Build initial Assignment menu for Steps and Programs
         self.object_programs_updated_changed(info)
         # Update step editor initially to display default step.
@@ -139,26 +131,12 @@ class ApplicationHandler(Controller, SaveHandler):
         """Update right-click menus for the all_steps and all_programs lists."""
 
         # Menu items for all_steps
-        # all_steps_menu_items = []
-        # for program in info.object.all_programs.programs:
-        #     all_steps_menu_items.append(Action(
-        #         name=program.name,
-        #         action="column.assign(info, to_program=%d)" % program.ID))
-        # for column in info.object.all_steps.editor.columns:
-        #     column.menu = Menu(Menu(*all_steps_menu_items, name="Assign to ..."))
         handler_all_steps = info.all_steps._ui.handler
         handler_all_steps.populate_rightclick_menu(info.all_steps._ui.info)
 
         # Menu items for all_programs
         handler_all_programs = info.all_programs._ui.handler
         handler_all_programs.populate_rightclick_menu(info.all_programs._ui.info)
-        # all_programs_menu_items = []
-        # for program in info.object.all_programs.programs:
-        #     all_programs_menu_items.append(Action(
-        #         name=program.name,
-        #         action="column.add_to(info, to_program=%d)" % program.ID))
-        # for column in info.object.all_programs.editor.columns:
-        #     column.menu = Menu(Menu(*all_programs_menu_items, name="Add to ..."))
 
     def object_steps_in_program_updated_changed(self, info):
         """Add steps which were added in a program to the all_steps list."""

@@ -436,10 +436,6 @@ class Step(utils.Counted, BaseStep):
 
     _xs_pulsed = Property(depends_on='duration, is_pulsed, pulse_on, pulse_off')
 
-    # @on_trait_change('duration, pulse_on, pulse_off')
-    # def invalidate__xs_pulsed(self):
-    #     self.trait('_xs_pulsed').invalidated = True
-
     @cached_property
     def _get__xs_pulsed(self):
         if not self.is_pulsed or self.pulse_on == 0 or self.pulse_off == 0 or self.duration == 0:
@@ -681,17 +677,13 @@ steplist_editor = TableEditor(
         StepColumn(name='ID', label='ID'),
         StepColumn(name='name', label='Name'),
         StepColumn(name='duration_ui.value_out', label='Dur'),
-        # StepColumn(name='duration_ui.unit', label=''),
         StepColumn(name='intensity', label='Int'),
         StepColumn(name='is_pulsed', label='Pls'),
         StepColumn(name='pulse_on_ui.value_out', label='ON'),
-        # StepColumn(name='pulse_on_ui.unit', label=''),
         StepColumn(name='pulse_off_ui.value_out', label='OFF'),
-        # StepColumn(name='pulse_off_ui.unit', label=''),
         StepColumn(name='in_programs', label='Prgs'),
         StepColumn(name='invalid', label='Invalid')
     ],
-    # auto_size=True,
     deletable=False,  # Steps need to un-assign themselves from programs. FIXME: breaks reorderable
     reorderable=True,
     sortable=True,
