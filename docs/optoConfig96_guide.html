@@ -12,6 +12,7 @@
     div.column{display: inline-block; vertical-align: top; width: 50%;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
   <link rel="stylesheet" href="guide.css" />
   <!--[if lt IE 9]>
@@ -28,6 +29,20 @@
 <p>Thomas, OS, Hörner, M &amp; Weber, W: A graphical user interface to design high-throughput optogenetic experiments with the optoPlate-96. <em>Nat Protoc</em> (2020). https://doi.org/10.1038/s41596-020-0349-x</p>
 <h1 id="installation-instructions">Installation Instructions</h1>
 <p>optoConfig-96 is available as a Python package or as standalone bundles for Windows 10 and MacOS 10.15. Installation should not take more than 5 minutes. To upload the generated code to the Arduino Micro controlling optoPlate-96, the Arduino IDE must be installed separately. It is available for Windows, Mac and Linux at <a href="https://www.arduino.cc/en/main/software">the website of the Arduino project</a>.</p>
+<h2 id="from-pypi">From PyPI</h2>
+<p>optoConfig 96 is on <a href="https://pypi.org/project/optoConfig96/">PyPI</a>!</p>
+<ol type="1">
+<li><p>Make sure you have Python 3.7 or later installed by running <code>python --version</code> in a terminal.</p></li>
+<li><p>We strongly recommend to use a Python virtual environment in order prevent compatibility clashes of dependencies. To create one, run <code>python -m venv optoconfig_venv</code>, then activate it:</p>
+<ol type="1">
+<li>On Mac/Linux: <code>source optoconfig_venv/scripts/bin/activate</code></li>
+<li>On Windows: <code>optoconfig_venv\Scripts\activate</code></li>
+</ol></li>
+<li><p>Install the package in the previously activated virtual environment:</p>
+<p><code>python -m pip install optoConfig96</code>.</p>
+<p>This will also download and install all necessary dependencies.</p></li>
+<li><p>In the activated virtual environment, run <code>python -m optoConfig96</code> to start the application.</p></li>
+</ol>
 <h2 id="windows-10">Windows 10</h2>
 <ol type="1">
 <li>Download the windows_optoConfig-96-x.x.x.zip archive from the <a href="https://github.com/WeberSynBioLab/optoConfig-96/releases">GitHub <em>Releases</em> page</a>, where <code>x.x.x</code> denotes the current version.</li>
@@ -41,6 +56,7 @@
 <li>You may be asked to allow execution of a foreign application. To do this, go to <em>System Preferences &gt; Security &amp; Privacy &gt; General</em> and grant optoConfig-96 permission to run. Administrator rights may be required depending on your security settings.</li>
 </ol>
 <h2 id="as-a-python-package">As a Python package</h2>
+<p>If you do not want to download the package from PyPI, you can download and install it yourself.</p>
 <ol type="1">
 <li><p>Clone the repository by entering:</p>
 <p><code>git clone https://github.com/WeberSynBioLab/optoConfig-96.git</code></p>
@@ -49,14 +65,14 @@
 <li>If you cloned the repository, you will first have to prepare the package by running <code>python setup.py build sdist</code> in a terminal, in the directory in which the optoConfig-96 <code>setup.py</code> is located.</li>
 <li>The package will be created at <code>dist/optoConfig96-x.x.x.tar.gz</code>, where <code>x.x.x</code> denotes the current version.</li>
 </ol></li>
-<li><p>Make sure you have Python 3.7 or Python 3.8 installed by running <code>python --version</code> in a terminal.</p></li>
+<li><p>Make sure you have Python 3.7 or later installed by running <code>python --version</code> in a terminal.</p></li>
 <li><p>We strongly recommend to use a Python virtual environment in order prevent compatibility clashes of dependencies. To create one, run <code>python -m venv optoconfig_venv</code>, then activate it:</p>
 <ol type="1">
 <li>On Mac/Linux: <code>source optoconfig_venv/scripts/bin/activate</code></li>
 <li>On Windows: <code>optoconfig_venv\Scripts\activate</code></li>
 </ol></li>
 <li><p>Install the package in the previously activated virtual environment:</p>
-<p><code>pip install dist/optoConfig96-x.x.x.tar.gz</code>.</p>
+<p><code>python -m pip install dist/optoConfig96-x.x.x.tar.gz</code>.</p>
 <p>This will also download and install all necessary dependencies.</p></li>
 <li><p>In the activated virtual environment, run <code>python -m optoConfig96</code> to start the application.</p></li>
 </ol>

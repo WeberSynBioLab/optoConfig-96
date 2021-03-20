@@ -14,6 +14,20 @@ Thomas, OS, Hörner, M & Weber, W: A graphical user interface to design high-thr
 
 optoConfig-96 is available as a Python package or as standalone bundles for Windows 10 and MacOS 10.15. Installation should not take more than 5 minutes. To upload the generated code to the Arduino Micro controlling optoPlate-96, the Arduino IDE must be installed separately. It is available for Windows, Mac and Linux at [the website of the Arduino project](https://www.arduino.cc/en/main/software).
 
+## From PyPI
+optoConfig 96 is on [PyPI](https://pypi.org/project/optoConfig96/)!
+
+1. Make sure you have Python 3.7 or later installed by running `python --version` in a terminal.
+1. We strongly recommend to use a Python virtual environment in order prevent compatibility clashes of dependencies. To create one, run `python -m venv optoconfig_venv`, then activate it:
+    1. On Mac/Linux: `source optoconfig_venv/scripts/bin/activate`
+    1. On Windows: `optoconfig_venv\Scripts\activate`
+1. Install the package in the previously activated virtual environment:
+
+    `python -m pip install optoConfig96`.
+
+    This will also download and install all necessary dependencies.
+1. In the activated virtual environment, run `python -m optoConfig96` to start the application.
+
 ## Windows 10
 1. Download the windows_optoConfig-96-x.x.x.zip archive from the [GitHub _Releases_ page](https://github.com/WeberSynBioLab/optoConfig-96/releases), where `x.x.x` denotes the current version.
 1. Extract the archive to a location of your choice.
@@ -25,6 +39,8 @@ optoConfig-96 is available as a Python package or as standalone bundles for Wind
 1. You may be asked to allow execution of a foreign application. To do this, go to *System Preferences > Security & Privacy > General* and grant optoConfig-96 permission to run. Administrator rights may be required depending on your security settings.
 
 ## As a Python package
+If you do not want to download the package from PyPI, you can download and install it yourself.
+
 1. Clone the repository by entering:
 
      `git clone https://github.com/WeberSynBioLab/optoConfig-96.git`
@@ -32,13 +48,13 @@ optoConfig-96 is available as a Python package or as standalone bundles for Wind
      in a terminal. Alternatively, download the package from the [GitHub _Releases_ page](https://github.com/WeberSynBioLab/optoConfig-96/releases). The package is not yet on [PyPI](https://www.pypi.org).
     1. If you cloned the repository, you will first have to prepare the package by running `python setup.py build sdist` in a terminal, in the directory in which the optoConfig-96 `setup.py` is located.
     1. The package will be created at `dist/optoConfig96-x.x.x.tar.gz`, where `x.x.x` denotes the current version.
-1. Make sure you have Python 3.7 or Python 3.8 installed by running `python --version` in a terminal.
+1. Make sure you have Python 3.7 or later installed by running `python --version` in a terminal.
 1. We strongly recommend to use a Python virtual environment in order prevent compatibility clashes of dependencies. To create one, run `python -m venv optoconfig_venv`, then activate it:
     1. On Mac/Linux: `source optoconfig_venv/scripts/bin/activate`
     1. On Windows: `optoconfig_venv\Scripts\activate`
 1. Install the package in the previously activated virtual environment:
 
-    `pip install dist/optoConfig96-x.x.x.tar.gz`.
+    `python -m pip install dist/optoConfig96-x.x.x.tar.gz`.
 
     This will also download and install all necessary dependencies.
 1. In the activated virtual environment, run `python -m optoConfig96` to start the application.
