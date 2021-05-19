@@ -21,7 +21,7 @@ Functions for restoring the application state from save data.
 """
 
 from .ui import *
-from traitsui.editors import ProgressEditor
+from traitsui.editors.api import ProgressEditor
 
 import numpy as np
 
