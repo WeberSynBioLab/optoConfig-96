@@ -1,7 +1,6 @@
-
 # optoConfig-96 - Interactive configuration of experiments using the optoPlate-96
 
-User guide for version 1.0.2.
+User guide for version 1.0.3.
 
 If optoConfig-96 was useful to you, please consider citing the paper:
 
@@ -42,7 +41,7 @@ If you do not want to download the package from PyPI, you can download and insta
 
      `git clone https://github.com/WeberSynBioLab/optoConfig-96.git`
 
-     in a terminal. Alternatively, download the package from the [GitHub _Releases_ page](https://github.com/WeberSynBioLab/optoConfig-96/releases). The package is not yet on [PyPI](https://www.pypi.org).
+     in a terminal. Alternatively, download the package from the [GitHub _Releases_ page](https://github.com/WeberSynBioLab/optoConfig-96/releases).
     1. If you cloned the repository, you will first have to prepare the package by running `python setup.py build sdist` in a terminal, in the directory in which the optoConfig-96 `setup.py` is located.
     1. The package will be created at `dist/optoConfig96-x.x.x.tar.gz`, where `x.x.x` denotes the current version.
 1. Make sure you have Python 3.7 or later installed by running `python --version` in a terminal.

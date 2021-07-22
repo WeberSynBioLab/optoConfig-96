@@ -25,16 +25,18 @@ setuptools.setup(
     classifiers=[
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Operating System :: OS Independent',
     ],
     keywords='biology optogenetics optoplate gui',
     install_requires=[
-        'traits>=5.2.0',
-        'traitsui>=6.1.3',
-        'PyQt5>=5.14.0',
-        'pygments>=2.5.2',
-        'numpy>=1.17.4',
-        'matplotlib>=3.1.1'
+        'traits>=6.2.0',
+        'traitsui>=7.2.1',
+        'PyQt5>=5.15.4',
+        'pygments>=2.9.0',
+        'numpy>=1.21.1',
+        'matplotlib>=3.4.2'
     ],
     python_requires='>=3.7',
     package_data={
