@@ -1,8 +1,8 @@
-﻿\begin{tikzpicture}%[remember picture, overlay]
-%\begin{scope}[shift={(current page.south west)}]
+﻿\input{annotation_preamble}
+\PassOptionsToPackage{paperwidth=1920px, paperheight=1080px, textwidth=1920px, textheight=1080px}{geometry}
 
-
-
+\begin{document}
+\begin{tikzpicture}
 \node (image) [imgnode,draw] {\includegraphics{overview}};
 
 
@@ -16,5 +16,5 @@
 \node[number] at (0.25, 0.25) {5};
 \node[number] at (0.75, 0.25) {6};
 \end{scope}
-
 \end{tikzpicture}
+\end{document}

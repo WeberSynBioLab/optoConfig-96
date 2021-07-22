@@ -1,5 +1,8 @@
-﻿\begin{tikzpicture}[>=stealth, line width=3pt]
+﻿\input{annotation_preamble}
+\PassOptionsToPackage{paperwidth=1920px, paperheight=1080px, textwidth=1920px, textheight=1080px}{geometry}
 
+\begin{document}
+\begin{tikzpicture}[>=stealth, line width=3pt]
 \tikzset{
 		line/.style={
 				draw, white, line width=8pt, ->,
@@ -7,8 +10,8 @@
 		}
 }
 
-\node (image) [imgnode] {\includegraphics{bulk_assign_programs}};
-\node (image2) [imgnode, below=2cm of image] {\includegraphics{bulk_assign_wells}};
+\node (image) [imgnode] {\includegraphics{../bulk_assign_programs}};
+\node (image2) [imgnode, below=2cm of image] {\includegraphics{../bulk_assign_wells}};
 
 \draw[->, >=stealth] (image) -- (image2) node[midway, right] {\resizebox{3.5cm}{!}{Bulk assign}};
 
@@ -22,3 +25,4 @@
 \end{scope}
 
 \end{tikzpicture}
+\end{document}
