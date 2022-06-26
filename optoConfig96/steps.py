@@ -371,7 +371,7 @@ class Step(utils.Counted, BaseStep):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.color = tuple(np.random.randint(0, 256, 3))
+        self.color = str(tuple(np.random.randint(0, 256, 3)))
 
     def __repr__(self):
         string = 'Step #{ID} ({name}) '
