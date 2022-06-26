@@ -38,7 +38,7 @@ setuptools.setup(
         'numpy>=1.21.1',
         'matplotlib>=3.4.2'
     ],
-    python_requires='>=3.7',
+    python_requires='>=3.7,<3.10',
     package_data={
         pkg_name: [
             'resources/appicon.png',
