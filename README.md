@@ -1,6 +1,6 @@
 # optoConfig-96 - Interactive configuration of experiments using the optoPlate-96
 
-User guide for version 1.0.3.
+User guide for version 1.0.4.
 
 If optoConfig-96 was useful to you, please consider citing the paper:
 
@@ -604,5 +604,3 @@ _The status bar._
 - *Fan speed:*
 
     Indicates the currently set fan speed. Adjust it under *Configuration > Set Fan Speed ...*
-
-
