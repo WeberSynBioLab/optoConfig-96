@@ -44,7 +44,7 @@ If you do not want to download the package from PyPI, you can download and insta
      in a terminal. Alternatively, download the package from the [GitHub _Releases_ page](https://github.com/WeberSynBioLab/optoConfig-96/releases).
     1. If you cloned the repository, you will first have to prepare the package by running `python setup.py build sdist` in a terminal, in the directory in which the optoConfig-96 `setup.py` is located.
     1. The package will be created at `dist/optoConfig96-x.x.x.tar.gz`, where `x.x.x` denotes the current version.
-1. Make sure you have Python 3.7 or later installed by running `python --version` in a terminal.
+1. Make sure you have Python 3.7 or later installed by running `python --version` in a terminal. Python 3.10 and up is currently not supported.
 1. We strongly recommend to use a Python virtual environment in order prevent compatibility clashes of dependencies. To create one, run `python -m venv optoconfig_venv`, then activate it:
     1. On Mac/Linux: `source optoconfig_venv/scripts/bin/activate`
     1. On Windows: `optoconfig_venv\Scripts\activate`
