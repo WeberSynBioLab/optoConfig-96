@@ -82,7 +82,8 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name = name + ".app",
-    icon = "optoConfig96/resources/oc96.icns"
+    icon = "optoConfig96/resources/oc96.icns",
+    version = __version__
 )
 # NOTE:
 # As of 2023-02-04, pyinstaller 5.7.0, the call to `codesign` fails due to
