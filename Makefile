@@ -1,4 +1,5 @@
-PKG_DOCS := optoConfig96/resources/docs
+PKG_RESOURCES := optoConfig96/resources
+PKG_DOCS := $(PKG_RESOURCES)/docs
 DOCS_IMAGES_RAW := $(PKG_DOCS)/images
 DOCS_IMAGES_ANNOTATED := $(DOCS_IMAGES_RAW)/annotated
 ANNOTATED_TIKZ := $(wildcard $(DOCS_IMAGES_ANNOTATED)/*.tikz)
@@ -26,6 +27,10 @@ README.md: $(PKG_DOCS)/guide.md
 	sed -i "s|images/|$(PKG_DOCS)/images/|g" "$@"
 
 
+$(PKG_RESOURCES)/oc96.icns: $(PKG_RESOURCES)/oc96.iconset
+	# Create MacOS iconset
+	iconutil -c icns --output "$@" "$<"
+
 check_version_number: $(PKG_DOCS)/guide.md README.md optoConfig96/version.py
 	# Check if version number in guide matches program version
 	for f in $<; do \
@@ -34,13 +39,3 @@ check_version_number: $(PKG_DOCS)/guide.md README.md optoConfig96/version.py
 			exit 1 ; \
 		fi ; \
 	done
-
-
-.PHONY: test_install
-test_install: generate_package
-	rm -rf test_install
-	mkdir test_install ; cd test_install ; \
-		python3 -m venv test_install_venv ; \
-		. test_install_venv/bin/activate ; \
-		python3 -m pip install ../dist/optoConfig96-$(VERSION).tar.gz ; \
-		python3 -m optoConfig96
