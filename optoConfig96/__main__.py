@@ -22,8 +22,8 @@ Application and entry point for the optoPlate96 GUI.
 from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 
-from .application import Application
-from .plates import PlateConfig
+from optoConfig96.application import Application
+from optoConfig96.plates import PlateConfig
 
 def main():
     app = Application()
