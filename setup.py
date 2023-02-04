@@ -40,8 +40,7 @@ setuptools.setup(
     ],
     extras_require = {
         'build': [
-            "cx_freeze>=6.13",
-            "dmgbuild>=1.6"
+            "pyinstaller>=5.7.0"
         ]
     },
     python_requires='>=3.7,<3.10',
