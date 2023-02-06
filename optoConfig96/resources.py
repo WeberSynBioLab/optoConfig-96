@@ -21,11 +21,12 @@ Handle image and file resources.
 """
 
 import os
+import pkg_resources
 from pyface.api import ImageResource
 from traits.api import *
 from traitsui.api import *
 
-search_path = os.path.join(os.path.split(os.path.abspath(__file__))[0], 'resources')
+search_path = pkg_resources.resource_filename("optoConfig96", "resources")
 
 APPICON = ImageResource(name='appicon.png', search_path=search_path)
 
