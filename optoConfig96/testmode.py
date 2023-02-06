@@ -168,9 +168,9 @@ class ExperimentPlayer(HasTraits):
         rowspergroup = 8 / self.plate.nrows
         colspergroup = 12 / self.plate.ncols
         axis.set_yticks(np.arange((n * rowspergroup - 1) * 0.5, 8 * n, n * rowspergroup))
-        axis.set_yticklabels('ABCDEFGH')
+        axis.set_yticklabels('ABCDEFGH'[:self.plate.nrows])
         axis.set_xticks(np.arange((colspergroup - 1) * 0.5, 12, colspergroup))
-        axis.set_xticklabels(np.arange(12) + 1)
+        axis.set_xticklabels(np.arange(self.plate.ncols) + 1)
         grid_y = np.arange(-0.5, 8 * n, n * rowspergroup)[1::]
         grid_x = np.arange(colspergroup - 1 + 0.5, 12.5, colspergroup)[:-1]
         # Draw gridlines manually; axis.grid gets lost with blitting

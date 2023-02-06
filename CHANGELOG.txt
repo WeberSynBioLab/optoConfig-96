@@ -1,1 +1,2 @@
+* Fix a crash when simulating an experiment in the 24-well layout
 * Change build system to pyinstaller from cx_freeze
